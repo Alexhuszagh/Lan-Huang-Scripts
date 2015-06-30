@@ -1,316 +1,460 @@
 #!/usr/bin/env python
 
-import argparse, os, sys, math
+# load modules
+import argparse
+import copy
+import math
+import os
 from collections import defaultdict
 
-strPath = os.path.dirname(os.path.realpath(__file__))
+# constants
+PATH = os.path.dirname(os.path.realpath(__file__))
 
-# Process arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--MGF", help="MGF File",
+# process arguments
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("-t", "--TPP", help="TPP File",
                     type=str)
-parser.add_argument("-p", "--PAVA", help="PAVA File",
+PARSER.add_argument("-p", "--PAVA", help="PAVA File",
                     type=str)
-parser.add_argument("-o", "--output", help="Output File Name (Optional)",
+PARSER.add_argument("-o", "--output", help="Output File Name (Optional)",
                     type=str)
-args = parser.parse_args()
+ARGS = PARSER.parse_args()
+# parse arguments
+if not ARGS.TPP or not ARGS.PAVA:
+    raise argparse.ArgumentTypeError("Please include both a PAVA file and "
+                                     "TPP file in the working directory")
+TPP_PATH = os.path.join(PATH, ARGS.TPP)
+PAVA_PATH = os.path.join(PATH, ARGS.PAVA)
+BASE_NAME = ARGS.PAVA[:-4] + "_corrected.txt"
+OUT_PATH = os.path.join(PATH, BASE_NAME)
+if ARGS.output:
+    OUT_PATH = os.path.join(PATH, ARGS.output)
 
-if not args.MGF or not args.PAVA:
-	raise IOError("Please include both a PAVA file and MGF file in the working directory")
+# ------------------
+#        I/O
+# ------------------
 
-strMGF = os.path.join(strPath, args.MGF)
-strPAVA = os.path.join(strPath, args.PAVA)
-outputBaseName = args.PAVA[:-4] + "_corrected.txt"
-strOutputPath = os.path.join(strPath, outputBaseName)
-if args.output:
-	strOutputPath = os.path.join(strPath, args.output)
-
-# Process output
+# output
 try:
-	with open(strMGF, 'r') as e:
-		strMGFFile = e.read()
+    with open(TPP_PATH, 'r') as fileobj:
+        MGF_SCANS = fileobj.read()
 except IOError:
-	raise IOError("MGF File not found. Make sure it is in the current working directory.")
+    raise argparse.ArgumentTypeError("MGF File not found. Make sure it is "
+                                     "in the current working directory.")
 
+# process input
 try:
-	with open(strPAVA, 'r') as e:
-		strPAVAFile = e.read()
+    with open(PAVA_PATH, 'r') as fileobj:
+        PAVA_SCANS = fileobj.read()
 except IOError:
-	raise IOError("PAVA File not found. Make sure it is in the current working directory.")
+    raise argparse.ArgumentTypeError("PAVA File not found. Make sure it is "
+                                     "in the current working directory.")
 
-def paired_start_end(strValue, strStartSub, strEndSub):
-	nStart = strValue.find(strStartSub) + len(strStartSub)
-	nEnd = strValue.find(strEndSub, strValue.find(strStartSub))
-	return nStart, nEnd
-	
-def find_all_shift_sub(strValue, strSub):
-	"""Find all occurrences within a string"""
-	nStart = 0
-	while True:
-		nStart = strValue.find(strSub, nStart)
-		if nStart == -1: return
-		nStart += len(strSub)
-		yield nStart
+# ------------------
+#       UTILS
+# ------------------
 
-class Parse_Scans(object):
-	#---------------
-	def __init__(self, strMSFile, strStartSub, strEndSub):
-		self.strMSFile = strMSFile
-		self.strStartSub = strStartSub
-		self.strEndSub = strEndSub
-	#---------------
-	def parse_scans(self):
-		nSplitLen=100000
+def paired_start_end(value, start_sub, end_sub):
+    '''Extract substring from string'''
 
-		cSplitFile = self.split_file(nSplitLen)
-		lStart, lEnd = self.find_all_positions(cSplitFile, nSplitLen)
-		return self.find_scans(lStart, lEnd)
-	#---------------
-	def split_file(self, nSplitLen):
-		nIter = int(math.ceil(len(self.strMSFile)/nSplitLen))+1
-		for x in range(nIter):
-			if (x+1)*nSplitLen <= len(self.strMSFile):
-				yield self.strMSFile[nSplitLen*x:nSplitLen*(x+1)]
-			else:
-				yield self.strMSFile[nSplitLen*x:] 												# Remaining string after last substring identified
-	#---------------
-	def find_all_positions(self, cGenerator, nSplitLen):
-		lStart = []
-		lEnd = []
-		strRemainder = ''
-		for index, scan in enumerate(cGenerator):
-			nCounter = index*nSplitLen - len(strRemainder)
-			strSearchSpace = strRemainder+scan
+    start = value.find(start_sub) + len(start_sub)
+    end = value.find(end_sub, value.find(start_sub))
+    return start, end
 
-			lStartVal = list(find_all_shift_sub(strSearchSpace, self.strStartSub))
-			lEndVal = list(find_all_shift_sub(strSearchSpace, self.strEndSub))
+def find_all_shift_sub(value, sub):
+    """Find all occurrences within a string"""
 
-			try:
-				nLastIndex = max(lStartVal + lEndVal)
-			except ValueError: 																	# In case none are found, then the scan is expanded
-				nLastIndex = 0
-			strRemainder = (strSearchSpace)[nLastIndex:]
-			lStart += [i+nCounter for i in lStartVal]
-			lEnd += [i+nCounter for i in lEndVal]
-		return lStart, lEnd
-	#---------------
-	def find_scans(self, lStart, lEnd):
-		for i, start in enumerate(lStart):
-			end = lEnd[i]
-			yield self.strMSFile[start:end]
-	#---------------
-	#---------------
-	#---------------
+    start = 0
+    while True:
+        start = value.find(sub, start)
+        if start == -1:
+            return
+        start += len(sub)
+        yield start
 
-class Parse_MGF(object):
-	#---------------
-	def __init__(self, strMGFFile):
-		self.lScans = Parse_Scans(strMGFFile, 'BEGIN IONS\n', '\nEND IONS').parse_scans()
-		self.dScanToData = defaultdict(dict)
-		self.process_scan_nums_to_data()
-	#---------------
-	def process_scan_nums_to_data(self):
-		for strScan in self.lScans: 															# Extract all spectra values per scan
-			dData = self.extract_scan_mgf(strScan)
-			strScanNum = dData.get('num')
-			self.dScanToData['%s' %strScanNum] = dData
-	#---------------
-	def extract_scan_mgf(self, strScan):
-		strHeader, strSpectra = self.find_header_spectra(strScan)
-		dScan = self.extract_header_mgf(strHeader)
-		dMZToIntensity = self.process_spectra(strSpectra)
-		dScan['type'] = 'MGF'
-		dScan['peaks'] = dMZToIntensity
-		return dScan
-	#---------------
-	def find_header_spectra(self, strScan):
-		lScan = strScan.splitlines()
-		nScanIndex = 0
-		for nIndex, strRow in enumerate(lScan): 												# In each spectra scan, first line that starts with a float
-			try: 																				# number is the start of the spectral data
-				float(strRow.split()[0])
-				nScanIndex = nIndex
-				break
-			except ValueError:	pass
+# ------------------
+#     PARSERS
+# ------------------
 
-		if not nScanIndex: 																		# If no scans, set the scan list to be blank,
-			lHeader = lScan 																	# and the header to be the rest
-			lSpectra = []
-			return '\n'.join(lHeader), '\n'.join(lSpectra)
-		else:
-			lHeader = lScan[:nScanIndex]
-			lSpectra = lScan[nScanIndex:]
-			return '\n'.join(lHeader), '\n'.join(lSpectra)
-	#---------------
-	def extract_header_mgf(self, strHeader):
-		if '(rt=' in strHeader: 																# Unique substring for a PAVA-style MGF file
-			return self.extract_PAVA_header(strHeader)
+class ParseScans(object):
+    '''Core scan parser object'''
 
-		elif 'RTINSECONDS=' in strHeader: 														# Substring for TPP-compatible MGF file
-			return self.extract_TPP_header(strHeader)
+    _split_length = 100000
 
-		else:	return
-	#---------------
-	def extract_PAVA_header(self, strHeader):
-		dReturn = {}
-		dParse = {
-			'num':['TITLE=Scan ', ' (rt='],
-			'retentionTime':[' (rt=', ') [']
-		}
+    def __init__(self, ms_scans, start_sub, end_sub):
+        super(ParseScans, self).__init__()
 
-		if 'MS2_SCAN_NUMBER' in strHeader:	dParse.update({'precursorScanNum':['MS2_SCAN_NUMBER= ', '\n']})
-		dReturn.update(self.parse_header(strHeader, dParse))
-		dReturn.update(self.parse_pep_mass(strHeader, 'PEPMASS=', '\n'))
-		dReturn.update(self.parse_charge(strHeader, 'CHARGE=', '+'))
+        self.msscans = ms_scans
+        self.start_sub = start_sub
+        self.end_sub = end_sub
 
-		return dReturn
-	#---------------
-	def extract_TPP_header(self, strHeader):
-		dReturn = {}
+    def run(self):
+        '''Splitting length'''
 
-		dParse = {'num':['scan=', '"\n'],
-				  'retentionTime':['RTINSECONDS=', '\n']
-				 }
+        generator = self.split_file()
+        start, end = self.find_all_positions(generator)
+        return self.find_scans(start, end)
 
-		dReturn.update(self.parse_header(strHeader, dParse))
-		dReturn.update(self.parse_pep_mass(strHeader, 'PEPMASS=', '\n'))
-		dReturn.update(self.parse_charge(strHeader, 'CHARGE=', '+'))
+    def split_file(self):
+        '''Splits a file and iteratively corrects it'''
 
-		if 'retentionTime' in dReturn:
-			strRetentionTime = dReturn.get('retentionTime')
-			nSecToMin = 60
-			dReturn['retentionTime'] = round(float(strRetentionTime)/nSecToMin, 3)
+        # grab scan count to iter over
+        scan_count = len(self.msscans)
+        num = int(math.ceil(scan_count/self._split_length))+1
+        # iteratively split
+        for start in range(0, num, self._split_length):
+            end = start + self._split_length
+            yield self.msscans[start:end]
 
-		return dReturn
-	#---------------
-	def parse_header(self, strHeader, dParse):
-		dReturn = {}
+    def find_all_positions(self, generator):
+        '''Find all scan start and end positions within the generator'''
 
-		for strKey in dParse:
-			strStartSub, strEndSub = dParse.get(strKey)
-			nStart, nEnd = paired_start_end(strHeader, strStartSub, strEndSub)
-			strValue = strHeader[nStart:nEnd]
-			dReturn[strKey] = strValue
-		return dReturn
-	#---------------
-	def parse_pep_mass(self, strHeader, strStartSub, strEndSub):
-		dReturn = {}
-		nStart, nEnd = paired_start_end(strHeader, strStartSub, strEndSub)
-		strPepMassRow = strHeader[nStart:nEnd]
-		lPepMass = strPepMassRow.split()
+        # init return
+        scan_start = []
+        scan_end = []
+        # remainder counter for everything leftover from a split
+        remainder = ''
+        for index, scan in enumerate(generator):
+            counter = index*self._split_length - len(remainder)
+            tmp_scan_str = remainder+scan
 
-		if len(lPepMass) == 1:
-			precursorMz = lPepMass[0]
-			dReturn['precursorMz'] = precursorMz
+            start_value = list(find_all_shift_sub(tmp_scan_str,
+                                                  self.start_sub))
+            end_value = list(find_all_shift_sub(tmp_scan_str, self.end_sub))
 
-		elif len(lPepMass) == 2:
-			precursorMz, precursorIntensity = lPepMass
-			dReturn['precursorMz'] = precursorMz
-			dReturn['precursorIntensity'] = precursorIntensity
-		return dReturn
-	#---------------
-	def parse_charge(self, strHeader, strStartSub, strEndSub):
-		dReturn = {}
-		precursorCharge = 1
-		if 'CHARGE=' in strHeader:
-			nStart, nEnd = paired_start_end(strHeader, strStartSub, strEndSub)
-			precursorCharge = strHeader[nStart:nEnd]
-		dReturn['precursorCharge'] = precursorCharge
-		return dReturn
-	#---------------
-	def process_spectra(self, strSpectra):
-		lSpectra = strSpectra.splitlines()
-		dSpectra = defaultdict(list)
-		for strRow in lSpectra:
-			lRow = strRow.split()
-			if len(lRow) == 2:
-				strMZ, strIntensity = lRow
-				dSpectra[strMZ] = [strIntensity]
-			elif len(lRow) == 3:
-				strMZ, strZ, strIntensity = lRow
-				dSpectra[strMZ] = [strIntensity, strZ]
-		try:	dSpectra.pop('END')
-		except KeyError:	pass
-		return dSpectra
-	#---------------
-	#---------------
-	#---------------
-	
-class fixScans(object):
-	def __init__(self, strPAVAFile, dCharges, outputPath):
-		self.lScans = Parse_Scans(strPAVAFile, 'BEGIN IONS\n', '\nEND IONS').parse_scans()
-		strPAVA = self.processScans(dCharges)
-		
-		with open(outputPath, 'w') as e:	pass								# Blank it
-		with open(outputPath, 'w') as e:
-			e.write(strPAVA)
-			
-	def processScans(self, dCharges):
-		self.ScanFile = str()
-		for strScan in self.lScans:
-			strStartSub, strEndSub = 'TITLE=Scan ', ' (rt='
-			nStart, nEnd = paired_start_end(strScan, strStartSub, strEndSub)
-			strScanNum = strScan[nStart:nEnd]
-			if strScanNum in dCharges:
-				newCharge, oldCharge = dCharges.get(strScanNum)
-			
-				strScan = strScan.replace("CHARGE=%s+" %(str(oldCharge)), "CHARGE=%s+" %(str(newCharge)))
-			self.ScanFile += "BEGIN IONS\n%s\n\n" %strScan
-		return self.ScanFile
-		
-class Compare_Charges(object):
-	def __init__(self, MGFFile, PAVAFile, outputPath):
-		cMGF = Parse_MGF(MGFFile)
-		self.dMGF = cMGF.dScanToData
-		
-		cPAVA = Parse_MGF(PAVAFile)
-		self.dPAVA = cPAVA.dScanToData
-		
-		self.dCharges = self.compileCharges(self.dMGF, self.dPAVA)
-		
-		fixScans(PAVAFile, self.dCharges, outputPath)
-		self.printOutput(self.dCharges, "chargeStates.txt")
-	#---------------
-	def compileCharges(self, dMGF, dPAVA):
-		dCharges = dict()
-		lMGFScans = dMGF.keys()
-		lPAVAScans = dPAVA.keys()
-		
-		lKeys = [i for i in lPAVAScans if i in lMGFScans]
-		
-		for key in lKeys:
-			dMGFScan = dMGF.get(key)
-			dPAVAScan = dPAVA.get(key)
-			
-			chargeMGF = dMGFScan.get("precursorCharge")
-			chargePAVA = dPAVAScan.get("precursorCharge")
-			
-			dCharges[key] = [str(chargeMGF), str(chargePAVA)]
-			
-		return dCharges
-	#---------------
-	def printOutput(self, dCharges, outputPath):
-		PAVACounter = 0
-		MGFCounter = 0
-		with open(outputPath, 'w') as e:	pass								# Blank it
-		with open(outputPath, 'w') as e:
-			e.write('Scan\tMGF\tPAVA\n')
-			lKeys = dCharges.keys()
-			lKeys = sorted([int(i) for i in lKeys])
-			lKeys = [str(i) for i in lKeys]
-			for key in lKeys:
-				chargeMGF, chargePAVA = dCharges.get(key)
-				if chargeMGF != '1':
-					MGFCounter += 1
-				if chargePAVA != '1':
-					PAVACounter += 1
-				if chargeMGF != chargePAVA:
-					e.write('%s\t%s\t%s\n' %(key, chargeMGF, chargePAVA))
-			
-			e.write('MGF Scans Above 1: %d\n' %MGFCounter)
-			e.write('PAVA Scans Above 1: %d\n' %PAVACounter)
-	#---------------
-	#---------------
-	#---------------
+            try:
+                last_idx = max(start_value + end_value)
+            except ValueError:
+                # In case none are found, then the scan is expanded
+                last_idx = 0
+            remainder = (tmp_scan_str)[last_idx:]
+            scan_start += [i+counter for i in start_value]
+            scan_end += [i+counter for i in end_value]
+        import pdb
+        pdb.set_trace()
+        return scan_start, scan_end
 
-Compare_Charges(strMGFFile, strPAVAFile, strOutputPath)
+    def find_scans(self, scan_start, scan_end):
+        '''Returns a generator for each scan string within the file'''
+
+        for i, start in enumerate(scan_start):
+            end = scan_end[i]
+            yield self.msscans[start:end]
+
+class ParseMGF(ParseScans):
+    '''Parses an MGF-type file format'''
+
+    _start_sub = 'BEGIN IONS'
+    _end_sub = 'END IONS'
+    _pava_parse = {
+        'num':['TITLE=Scan ', ' (rt='],
+        'retentionTime':[' (rt=', ') [']
+    }
+    _tpp_parse = {
+        'num':['scan=', '"\n'],
+        'retentionTime':['RTINSECONDS=', '\n']
+    }
+    _pep_mass = {
+        'start' : 'PEPMASS=',
+        'end': '\n'
+    }
+    _charge = {
+        'start': 'CHARGE=',
+        'end': '+'
+    }
+
+    def __init__(self, scans):
+        super(ParseMGF, self).__init__(scans, self._start_sub, self._end_sub)
+
+        # bind instance attributes
+        self.scans = self.run()
+        self.scan_data = defaultdict(dict)
+        self.process_scan_nums_to_data()
+
+    # ------------------
+    #       MAIN
+    # ------------------
+
+    def process_scan_nums_to_data(self):
+        '''Processes each scan by number'''
+
+        # Extract all spectra values per scan
+        for scan in self.scans:
+            data = self.extract_scan_mgf(scan)
+            num = data.get('num')
+            self.scan_data['%s' %num] = data
+
+    def extract_scan_mgf(self, scan):
+        '''Extracts data from all MGF scans'''
+
+        # split header and spectra, extract metadata
+        header, spectra = self.find_header_spectra(scan)
+        data = self.extract_header_mgf(header)
+        # process peaklists
+        peaks = self.process_spectra(spectra)
+        # store data and return object
+        data['type'] = 'MGF'
+        data['peaks'] = peaks
+        return data
+
+    # ------------------
+    #   EXTRACT UTILS
+    # ------------------
+
+    @staticmethod
+    def find_header_spectra(scan):
+        '''Finds and extracts the header from the scan'''
+
+        scan = scan.splitlines()[1:-1]
+        #import pdb; pdb.set_trace()
+        scan_index = None
+        # In each spectra scan, first line that starts with a float
+        for index, row in enumerate(scan):
+            # number is the start of the spectral data
+            try:
+                float(row.split()[0])
+                scan_index = index
+                break
+            except ValueError:
+                pass
+        # If no scans, set the scan list to be blank,
+        if scan_index is None:
+            # and the header to be the rest
+            header = scan
+            spectra = []
+            return '\n'.join(header), '\n'.join(spectra)
+        else:
+            header = '\n'.join(scan[:scan_index])
+            spectra = '\n'.join(scan[scan_index:])
+            return header, spectra
+
+    def extract_header_mgf(self, header):
+        '''Extracts data from the MGF header'''
+
+        # Unique substring for a PAVA-style MGF file
+        if '(rt=' in header:
+            return self.extract_pava_header(header)
+        # Substring for TPP-compatible MGF file
+        elif 'RTINSECONDS=' in header:
+            return self.extract_tpp_header(header)
+
+        else:
+            return
+
+    def extract_pava_header(self, header):
+        '''Extracts the metadata from the PAVA header'''
+
+        # init return
+        data = {}
+        parse = copy.deepcopy(self._pava_parse)
+        if 'MS2_SCAN_NUMBER' in header:
+            parse.update({'precursorScanNum':['MS2_SCAN_NUMBER= ', '\n']})
+        # update scan dictionary
+        self.parse_header(header, parse, data)
+        self.parse_pep_mass(header, data)
+        self.parse_charge(header, data)
+
+        return data
+
+    def extract_tpp_header(self, header):
+        '''Extracts the metadata from the TPP header'''
+
+        data = {}
+        self.parse_header(header, self._tpp_parse, data)
+        self.parse_pep_mass(header, data)
+        self.parse_charge(header, data)
+
+        if 'retentionTime' in data:
+            retention_time = data.get('retentionTime')
+            min_seconds = 60
+            data['retentionTime'] = round(float(retention_time)/min_seconds, 3)
+
+        return data
+
+    # ------------------
+    #    PARSE UTILS
+    # ------------------
+
+    @staticmethod
+    def parse_header(header, parse_subs, data):
+        '''Parses and extracts the metadata from the scan header'''
+
+        for key in parse_subs:
+            start_sub, end_sub = parse_subs.get(key)
+            start, end = paired_start_end(header, start_sub, end_sub)
+            value = header[start:end]
+            data[key] = value
+
+    def parse_pep_mass(self, header, data):
+        '''Process the peptide mass'''
+
+        start, end = paired_start_end(header, self._pep_mass['start'],
+                                      self._pep_mass['end'])
+        row = header[start:end]
+        pep_mass = row.split()
+        # only one entry in header
+        if len(pep_mass) == 1:
+            precursor_mz = pep_mass[0]
+            data['precursorMz'] = precursor_mz
+        # mz/intensity pair in header
+        elif len(pep_mass) == 2:
+            precursor_mz, precursor_intensity = pep_mass
+            data['precursorMz'] = precursor_mz
+            data['precursorIntensity'] = precursor_intensity
+
+    def parse_charge(self, header, data):
+        '''Processes the peptide charges'''
+
+        precursor_charge = 1
+        if 'CHARGE=' in header:
+            start, end = paired_start_end(header, self._charge['start'],
+                                          self._charge['end'])
+            precursor_charge = header[start:end]
+        data['precursorCharge'] = precursor_charge
+        return data
+
+    @staticmethod
+    def process_spectra(spectra):
+        '''Processes the spectra and extracts the m/z and intensities'''
+
+        # init return
+        data = defaultdict(list)
+        # iterate over rows in spectra
+        spectra = spectra.splitlines()
+        for row in spectra:
+            row = row.split()
+            # mz/intensity paired values
+            if len(row) == 2:
+                mz_value, intensity = row
+                data[mz_value] = [intensity]
+            # mz/charge/intensity values
+            elif len(row) == 3:
+                mz_value, charge, intensity = row
+                data[mz_value] = [intensity, charge]
+        try:
+            del data['END']
+        except KeyError:
+            pass
+        return data
+
+
+# ------------------
+#    SCAN FIXER
+# ------------------
+
+class FixScans(ParseScans):
+    '''Fixes the PAVA scans from the MGF scan data'''
+
+    _scan_start = 'BEGIN IONS'
+    _scan_end = 'END IONS'
+    _start = 'TITLE=Scan '
+    _end = ' (rt='
+
+    def __init__(self, pava_scans, charges, output):
+        super(FixScans, self).__init__(pava_scans, self._scan_start,
+                                       self._scan_end)
+
+        # bind instance attributes
+        self.scans = self.run()
+        pava_string = self.process_scans(charges)
+        self.fixed_scans = str()
+        # write to file
+        with open(output, 'w') as fileobj:
+            fileobj.write(pava_string)
+
+    def process_scans(self, charges):
+        '''Processes the PAVA scan list and corrects their charges'''
+
+
+        for scan in self.scans:
+            # grab start/end pair
+            start, end = paired_start_end(scan, self._start, self._end)
+            num = scan[start:end]
+            try:
+                # replace old charge with new charge in string
+                new_charge, old_charge = charges[num]
+                old_str = "CHARGE=%s+" %(str(old_charge))
+                new_str = "CHARGE=%s+" %(str(new_charge))
+                scan = scan.replace(old_str, new_str)
+            except KeyError:
+                # not in scan
+                pass
+            self.fixed_scans += "BEGIN IONS\n%s\n\n" %scan
+        return self.fixed_scans
+
+# ------------------
+#      OUTPUT
+# ------------------
+
+class CompareCharges(object):
+    '''Compares and corrects the charge settings in the PAVA-like MGF
+    file from a TPP-like MGF reference file.
+    '''
+
+    _output_name = "chargeStates.txt"
+
+    def __init__(self, tpp_scans, pava_scans, out_path):
+        super(CompareCharges, self).__init__()
+
+        # grab scan data and bind to instance
+        tpp_cls = ParseMGF(tpp_scans)
+        self.tpp_data = tpp_cls.scan_data
+        pava_cls = ParseMGF(pava_scans)
+        self.pava_data = pava_cls.scan_data
+        # make
+        self.charges = {}
+        self.compile_charges()
+        # fix the scans in place
+        cls = FixScans(pava_scans, self.charges, out_path)
+        cls.run()
+        # write comparative output
+        self.output_path = os.path.join(PATH, self._output_name)
+        self.write_comparative_output()
+
+    def compile_charges(self):
+        '''Creates a {scan: [MGF, PAVA]} dict of charges'''
+
+        # grab scans
+        tpp_scans = self.tpp_data.keys()
+        pava_scans = self.pava_data.keys()
+        # grab shared keys
+        keys = [i for i in pava_scans if i in tpp_scans]
+        # iteratively grab keys
+        for key in keys:
+            # grab scans
+            tpp_scan = self.tpp_data.get(key, {})
+            pava_scan = self.pava_data.get(key, {})
+            # grab charges
+            tpp_charge = str(tpp_scan.get("precursorCharge"))
+            pava_charge = str(pava_scan.get("precursorCharge"))
+            # assign to dict
+            self.charges[key] = [tpp_charge, pava_charge]
+
+    def write_comparative_output(self):
+        '''Writes the comparative summary between the two files'''
+
+        # init counters
+        pava_counter = 0
+        mgf_counter = 0
+        # iteratively write daata
+        with open(self.output_path, 'w') as fileobj:
+            # comparative
+            fileobj.write('Scan\tMGF\tPAVA\n')
+            keys = sorted(self.charges.keys(), key=int)
+            for key in keys:
+                tpp_charge, pava_charge = self.charges.get(key)
+                # add counters
+                if tpp_charge != '1':
+                    mgf_counter += 1
+                if pava_charge != '1':
+                    pava_counter += 1
+                # if charges differ...
+                if tpp_charge != pava_charge:
+                    out = '%s\t%s\t%s\n' %(key, tpp_charge, pava_charge)
+                    fileobj.write(out)
+            # write counters
+            fileobj.write('MGF Scans Above 1: %d\n' %mgf_counter)
+            fileobj.write('PAVA Scans Above 1: %d\n' %pava_counter)
+
+if __name__ == '__main__':
+    CompareCharges(MGF_SCANS, PAVA_SCANS, OUT_PATH)
