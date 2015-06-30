@@ -1,7 +1,7 @@
 # Lan Huang Scripts
 General, short, command-line scripts for the Lan Huang Laboratory (written mainly in Python). Python was chosen for its cross-platform and emphasis on [duck-typing](https://en.wikipedia.org/wiki/Duck_typing) and readability, making simple, powerful code.
 
-These scripts should be fully supported on any Python-supported operating system, using any Python 2.7.x or Pytho 3.4.x version.
+These scripts should be fully supported on any Python-supported operating system, using any Python 2.7.x or Python 3.4.x version.
 
 **Table of Contents**
 
