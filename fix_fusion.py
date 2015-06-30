@@ -27,7 +27,7 @@ __email__ = "ahuszagh@google.com"
 # can correct the PAVA-file.
 
 # Ex.:
-# OLD:
+# INPUT:
 #       BEGIN IONS
 #       SCAN_FILTER=ITMS + c NSI r d Full ms3 380.70@cid23.00 560.27@hcd30.00 [120.00-571.00]
 #       MS2_SCAN_NUMBER= 1045
@@ -36,7 +36,7 @@ __email__ = "ahuszagh@google.com"
 #       CHARGE=1+
 #       ....
 
-# NEW:
+# OUTPUT:
 #       BEGIN IONS
 #       SCAN_FILTER=ITMS + c NSI r d Full ms3 380.70@cid23.00 560.27@hcd30.00 [120.00-571.00]
 #       MS2_SCAN_NUMBER= 1045
