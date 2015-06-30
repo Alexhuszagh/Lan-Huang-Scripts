@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this xlDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from __future__ import print_function
+
 __author__ = "Alex Huszagh"
 __maintainer__ = "Alex Huszagh"
 __email__ = "ahuszagh@gmail.com"
@@ -80,8 +82,6 @@ __email__ = "ahuszagh@gmail.com"
 # -------------------------
 
 # load modules
-from __future__ import print_function
-
 import argparse
 import os
 import six
