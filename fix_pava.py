@@ -18,11 +18,25 @@ along with this xlDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 
 # This program aims to fix the charge states within the PAVA MGF-like file
 # format and use it to fix the lower charge states from misassigned charges.
+# Ex.:
+# OLD:
+#       BEGIN IONS
+#       TITLE=Scan 341 (rt=7.861) [beta_orbi041214_01.raw]
+#       PEPMASS=338.414 1432891.31
+#       CHARGE=2+
+#       ....
+
+# NEW:
+#       BEGIN IONS
+#       TITLE=Scan 341 (rt=7.861) [beta_orbi041214_01.raw]
+#       PEPMASS=338.414 1432891.31
+#       CHARGE=4+
+#       ....
+
+# Tested on Python 2.7.9 Ubuntu and Python 3.4.3, Ubuntu
 
 # load modules
 import argparse
-#import copy
-#import math
 import os
 import re
 import six
@@ -31,9 +45,6 @@ if six.PY2:
     from cStringIO import StringIO
 else:
     from io import StringIO
-
-# load functions/objects
-#from collections import defaultdict
 
 # constants
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -382,14 +393,11 @@ def main():
     pava_cls = ParseMgf(PAVA_SCANS, 'PAVA', TPP=tpp_cls.data)
     pava_cls.run()
     # grab shared keys
-    import pdb
-    pdb.set_trace()
 
 if __name__ == '__main__':
 
     # make write file
     OUT_FILE = open(OUT_PATH, 'w')
-    print(OUT_FILE.name)
     # call main tasks
     main()
     OUT_FILE.close()
