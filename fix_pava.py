@@ -16,6 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this xlDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+__author__ = "Alex Huszagh"
+__maintainer__ = "Alex Huszagh"
+__email__ = "ahuszagh@google.com"
+
 # This program aims to fix the charge states within the PAVA MGF-like file
 # format and use it to fix the lower charge states from misassigned charges.
 # Ex.:
@@ -45,6 +49,8 @@ if six.PY2:
     from cStringIO import StringIO
 else:
     from io import StringIO
+
+# pylint: disable=protected-access, too-many-instance-attributes
 
 # constants
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -119,9 +125,6 @@ try:
 except IOError:
     raise argparse.ArgumentTypeError("PAVA File not found. Make sure it is "
                                      "in the current working directory.")
-
-
-# pylint: disable=W0212
 
 # ------------------
 #    SCAN FINDER
@@ -321,7 +324,11 @@ class ParseMgf(object):
             charge = 1
         else:
             charge = int(match[10])
-        self.write_charges(scan_string, tpp_charge, charge)
+        # process changes
+        scan_string = self.replace_charges(scan_string, tpp_charge, charge)
+        # write to file
+        self.write_new_scan(scan_string)
+        # process summary
         self.adjust_counters(tpp_charge, charge)
         self.write_line(num, tpp_charge, charge)
 
@@ -350,7 +357,7 @@ class ParseMgf(object):
     #        UTILS
     # ------------------
 
-    def write_charges(self, scan_string, tpp_charge, charge):
+    def replace_charges(self, scan_string, tpp_charge, charge):
         '''Writes the adjust scan charges back to PAVA file'''
 
         if tpp_charge is not None:
@@ -358,8 +365,14 @@ class ParseMgf(object):
                 old_charge = self._charge.format(charge)
                 new_charge = self._charge.format(tpp_charge)
                 scan_string = scan_string.replace(old_charge, new_charge)
+        return scan_string
+
+    def write_new_scan(self, scan_string):
+        '''Writes the new scan string to file'''
+
         scan_string = ''.join([scan_string, '\n\n'])
-        OUT_FILE.write(scan_string)
+        # pylint: disable=maybe-no-member
+        self.data.write(scan_string)
 
     def adjust_counters(self, tpp_charge, pava_charge):
         '''Toggles the counters depending on the charge states of

@@ -1,205 +1,382 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
-# Lan Huang Theoretical XLed, Program Manager
-# Created by Alex Huszagh, 2014
+'''
+Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh/xlDiscoverer>>
 
-__doc__ = """This program creates a visual framework for scripts in the XL Toolset.
-Dependencies include PySide, Matplotlib, Pandas, Numpy, and Biopython"""
+xlDiscoverer is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This xlDiscoverer is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this xlDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 __author__ = "Alex Huszagh"
-__version__ = "0.8.0.0 RC"
 __maintainer__ = "Alex Huszagh"
-__email__ = "ahuszagh@uci.edu"
-__status__ = "Development"
-__license__ = """Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+__email__ = "ahuszagh@google.com"
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software."""
+# This program aims to fix the missing data from the PAVA Raw Distiller
+# with newer versions of the Thermo RAW file format, such as with the
+# Orbitrap FUSION format. This can lead to an empty PEPMASS line, as
+# well as other missing data. By using a TPP-compatible MGF file, we
+# can correct the PAVA-file.
 
-import sys, argparse, os, math
+# Ex.:
+# OLD:
+#       BEGIN IONS
+#       SCAN_FILTER=ITMS + c NSI r d Full ms3 380.70@cid23.00 560.27@hcd30.00 [120.00-571.00]
+#       MS2_SCAN_NUMBER= 1045
+#       TITLE=Scan 1046 (rt=9.324) [20140313_02_Lan_1_MS2CIDOT23_MS3HCDIT_Top3.raw]
+#       PEPMASS=0   0.0000
+#       CHARGE=1+
+#       ....
 
-strPath = os.path.dirname(os.path.realpath(__file__))
+# NEW:
+#       BEGIN IONS
+#       SCAN_FILTER=ITMS + c NSI r d Full ms3 380.70@cid23.00 560.27@hcd30.00 [120.00-571.00]
+#       MS2_SCAN_NUMBER= 1045
+#       TITLE=Scan 1046 (rt=9.324) [20140313_02_Lan_1_MS2CIDOT23_MS3HCDIT_Top3.raw]
+#       PEPMASS=560.26831 30933.20313
+#       CHARGE=1+
+#       ....
 
-# Process arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--MGF", help="MGF File",
+# Tested on Python 2.7.9 Ubuntu and Python 3.4.3, Ubuntu
+
+# load modules
+import argparse
+import os
+import re
+import six
+
+# pylint: disable=protected-access, too-many-instance-attributes
+
+# constants
+PATH = os.path.dirname(os.path.realpath(__file__))
+TPP_PARSER = re.compile(
+    r'BEGIN IONS\r?\n'
+    r'TITLE=(.*)\.[0-9]+\.[0-9]+\.[0-9]* '
+    # one massively long line
+    r'File:\"(.*)\", NativeID:\"'
+    r'controllerType=[0-9]+ '
+    r'controllerNumber=[0-9]+ scan=([0-9]+)\"\r?\n'
+    # newline
+    r'RTINSECONDS=([0-9]*\.?[0-9]*)\r?\n'
+    r'PEPMASS=([0-9]+\.[0-9]+)'
+    r'(?: ([0-9]*\.[0-9]+))?\r?\n'
+    r'(CHARGE=([0-9]+)\+\r?\n)?')
+PAVA_PARSER = re.compile(
+    r'^BEGIN IONS\r?\n'
+    # In case of file header line, in _ms3cid files
+    r'(.*\r?\n)?'
+    # precursor in ms2
+    r'(?:MS2_SCAN_NUMBER= ([0-9]+)\r?\n)?'
+    r'TITLE=Scan ([0-9]+) '
+    r'\(rt=([0-9]*\.[0-9]+)\) \[(.*)\]\r?\n'
+    r'PEPMASS=([0-9]+\.?[0-9]*)\s+'
+    r'([0-9]*(\.?[0-9]*)?)\r?\n'
+    # Line could be missing if CHARGE=1+
+    r'(CHARGE=([0-9]+)\+\r?\n)?'
+)
+
+# process arguments
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("-t", "--TPP", help="TPP File",
                     type=str)
-parser.add_argument("-p", "--PAVA", help="PAVA File",
+PARSER.add_argument("-p", "--PAVA", help="PAVA File",
                     type=str)
-args = parser.parse_args()
+PARSER.add_argument("-o", "--output", help="Output File Name (Optional)",
+                    type=str)
+ARGS = PARSER.parse_args()
+# parse arguments
+if not ARGS.TPP or not ARGS.PAVA:
+    raise argparse.ArgumentTypeError("Please include both a PAVA file and "
+                                     "TPP file in the working directory")
 
-if not args.MGF or not args.PAVA:
-	raise IOError("Please include both a PAVA file and MGF file in the working directory")
+TPP_PATH = os.path.join(PATH, ARGS.TPP)
+PAVA_PATH = os.path.join(PATH, ARGS.PAVA)
+BASE_NAME = os.path.splitext(os.path.basename(ARGS.PAVA))[0] + "_corrected.txt"
+OUT_PATH = os.path.join(PATH, BASE_NAME)
+if ARGS.output:
+    OUT_PATH = os.path.join(PATH, ARGS.output)
 
-strMGF = os.path.join(strPath, args.MGF)
-strPAVA = os.path.join(strPath, args.PAVA)
+# ------------------
+#        I/O
+# ------------------
 
-# Process output
+# output
 try:
-	with open(strMGF, 'r') as e:
-		strMGFFile=e.read()
+    TPP_SCANS = open(TPP_PATH, 'r')
 except IOError:
-	raise IOError("MGF File not found. Make sure it is in the current working directory.")
+    raise argparse.ArgumentTypeError("MGF File not found. Make sure it is "
+                                     "in the current working directory.")
 
+# process input
 try:
-	with open(strPAVA, 'r') as e:
-		strPAVAFile=e.read()
+    PAVA_SCANS = open(PAVA_PATH, 'r')
 except IOError:
-	raise IOError("PAVA File not found. Make sure it is in the current working directory.")
+    raise argparse.ArgumentTypeError("PAVA File not found. Make sure it is "
+                                     "in the current working directory.")
 
-class Find_Tools(object):
-	#------------
-	def find_all(self, strValue, strSub):
-		"""Find all occurrences within a string"""
-		nStart = 0
-		while True:
-			nStart = strValue.find(strSub, nStart)
-			if nStart == -1: return
-			yield nStart
-			nStart += len(strSub)
-	#------------
-	def find_all_indices(self, lValue, strSub):
-		"""Find all occurrences within a list"""
-		lReturn = []
-		nOffset = -1
-		while True:
-			try:
-				nOffset = lValue.index(strSub, nOffset+1)
-			except ValueError:
-				return lReturn
-			lReturn.append(nOffset)
-	#------------
-	def find_all_shift_sub(self, strValue, strSub):
-		"""Find all occurrences within a string"""
-		nStart = 0
-		while True:
-			nStart = strValue.find(strSub, nStart)
-			if nStart == -1: return
-			nStart += len(strSub)
-			yield nStart
-	#------------
-	def splitif(self, strValue, strSub, strCondition):
-		lReturn = []
-		while strCondition in strValue:
-			nStart = strValue.find(strSub, strValue.find(strCondition))
-			lReturn.append(strValue[:nStart])
-			strValue = strValue[nStart+len(strSub):]
-		lReturn.append(strValue)
-		return lReturn
-	#------------
-	def find_substring(self, strValue, strStart, strEnd):
-		nStart = strValue.find(strStart)
-		nEnd = strValue.find(strEnd, nStart) + len(strEnd)
-		return strValue[nStart:nEnd]
-	#------------
-	def paired_start_end(self, strValue, strStartSub, strEndSub):
-		nStart = strValue.find(strStartSub) + len(strStartSub)
-		nEnd = strValue.find(strEndSub, strValue.find(strStartSub))
-		return nStart, nEnd
-	#------------
-	#------------
-	#------------
+# ------------------
+#    SCAN FINDER
+# ------------------
 
-# Define key modules
-cFtools = Find_Tools()
+class ScanFinder(object):
+    '''Iteratively parses chunks and breaks them into scans, with
+    a bound remainder.
+    '''
 
-class Parse_Scans(object):
-	#---------------
-	def __init__(self, strMSFile, strStartSub, strEndSub):
-		self.strMSFile = strMSFile
-		self.strStartSub = strStartSub
-		self.strEndSub = strEndSub
-	#---------------
-	def parse_scans(self):
-		nSplitLen=100000
+    def __init__(self, start_sub, end_sub):
+        '''Binds instance atrributes and calls object'''
+        super(ScanFinder, self).__init__()
 
-		cSplitFile = self.split_file(nSplitLen)
-		lStart, lEnd = self.find_all_positions(cSplitFile, nSplitLen)
-		return self.find_scans(lStart, lEnd)
-	#---------------
-	def split_file(self, nSplitLen):
-		nIter = int(math.ceil(len(self.strMSFile)/nSplitLen))+1
-		for x in range(nIter):
-			if (x+1)*nSplitLen <= len(self.strMSFile):
-				yield self.strMSFile[nSplitLen*x:nSplitLen*(x+1)]
-			else:
-				yield self.strMSFile[nSplitLen*x:] 												# Remaining string after last substring identified
-	#---------------
-	def find_all_positions(self, cGenerator, nSplitLen):
-		lStart = []
-		lEnd = []
-		strRemainder = ''
-		for index, scan in enumerate(cGenerator):
-			nCounter = index*nSplitLen - len(strRemainder)
-			strSearchSpace = strRemainder+scan
+        # bind instance attributes
+        self.remainder = ''
+        self.start_sub = start_sub
+        self.end_sub = end_sub
 
-			lStartVal = list(cFtools.find_all_shift_sub(strSearchSpace, self.strStartSub))
-			lEndVal = list(cFtools.find_all_shift_sub(strSearchSpace, self.strEndSub))
+    def parse_chunk(self, chunk):
+        '''Parses a read chunk and adds to the remainder, and then
+        processes scan subs.
 
-			try:
-				nLastIndex = max(lStartVal + lEndVal)
-			except ValueError: 																	# In case none are found, then the scan is expanded
-				nLastIndex = 0
-			strRemainder = (strSearchSpace)[nLastIndex:]
-			lStart += [i+nCounter for i in lStartVal]
-			lEnd += [i+nCounter for i in lEndVal]
-		return lStart, lEnd
-	#---------------
-	def find_scans(self, lStart, lEnd):
-		for i, start in enumerate(lStart):
-			end = lEnd[i]
-			yield self.strMSFile[start:end]
-	#---------------
-	#---------------
-	#---------------
+        Arguments:
+            chunk -- read chunk, ie, 4096 chars, etc.
+        '''
 
-class ReplaceScan(object):
-	#---------------
-	def __init__(self, strMGFFile, strPAVAFile):
-		self.dMGFScanToPepMass = self.parseMGF(strMGFFile)
-		del strMGFFile
-		self.strPAVAFile = self.fixHeader(strPAVAFile)
-	#---------------
-	def parseMGF(self, strMGFFile):
-		lScans = Parse_Scans(strMGFFile, 'BEGIN IONS\n', '\nEND IONS').parse_scans()
-		dMGFScanToPepMass = dict()
+        # add to stored
+        self.remainder += chunk
+        # init return
+        scans = []
+        start = None
+        end = None
+        # iteratively add until not found
+        while end != -1:
+            # find start and end subs
+            start = self.find_start()
+            end, match = self.find_end()
+            # if both found
+            if end != -1:
+                # yield scan
+                scan = self.get_scan(start, end, match)
+                scans.append(scan)
+                # adjust remainder
+                self.adjust_remainder(end, match)
+        return scans
 
-		for strScan in lScans:
-			lScan = strScan.splitlines()
-			nStart, nEnd = cFtools.paired_start_end(strScan, 'scan=', '"\n')
-			strScanNum = strScan[nStart:nEnd]
-			for strRow in lScan:
-				if 'PEPMASS' in strRow:
-					strPepMass = strRow
-			dMGFScanToPepMass[strScanNum] = strPepMass
+    def find_start(self):
+        '''Finds the start position of a given scan'''
 
-		return dMGFScanToPepMass
-	#---------------
-	def fixHeader(self, strPAVAFile):
-		lScans = Parse_Scans(strPAVAFile, 'BEGIN IONS', 'END IONS').parse_scans()
-		lReturn = list()
-		for strScan in lScans:
-			nStart, nEnd = cFtools.paired_start_end(strScan, 'TITLE=Scan ', ' (rt=')
-			strScanNum = strScan[nStart:nEnd]
-			strPepMass = self.dMGFScanToPepMass.get(strScanNum)
-			try:
-				strScanNew = strScan.replace('PEPMASS=0\t0.0000', strPepMass)
-			except TypeError:
-				print repr(strPepMass), repr(strScanNum); quit()
-			strScanNew='BEGIN IONS' + strScanNew
-			lReturn.append(strScanNew)
-		return '\n\n'.join(lReturn)
-	#---------------
-	#---------------
-	#---------------
+        if isinstance(self.start_sub, six.string_types):
+            start = self.remainder.find(self.start_sub)
+        # if re sub
+        elif isinstance(self.start_sub, re._pattern_type):
+            match = self.start_sub.search(self.remainder)
+            if match is None:
+                start = -1
+            else:
+                start = match.start()
+        return start
 
-# Process output
-cReplaceScan = ReplaceScan(strMGFFile, strPAVAFile)
+    def find_end(self):
+        '''Finds the end position of a given scan'''
 
-with open(strPAVA[:-4] + '_fixed.txt', 'w') as e:	pass
-with open(strPAVA[:-4] + '_fixed.txt', 'w') as e:
-	e.write(cReplaceScan.strPAVAFile)
+        if isinstance(self.end_sub, six.string_types):
+            end = self.remainder.find(self.end_sub)
+            match = None
+        # if re sub
+        elif isinstance(self.end_sub, re._pattern_type):
+            match = self.end_sub.search(self.remainder)
+            if match is None:
+                end = -1
+            else:
+                end = match.start()
+        return end, match
+
+    def get_scan(self, start, end, match):
+        '''Gets the full scan string of the MS scan file.
+
+        Arguments:
+            start, end -- ints for start and end of the scan
+            match -- re match pattern or NoneType
+        '''
+
+        # grab sub lengths
+        if isinstance(self.end_sub, six.string_types):
+            sub_end = end + len(self.end_sub)
+        # if re sub
+        elif isinstance(self.end_sub, re._pattern_type):
+            sub_end = match.end()
+        # grab full scan and return
+        scan = self.remainder[start:sub_end]
+        return scan
+
+    def adjust_remainder(self, end, match):
+        '''Adjusts the remaining string length for new scan processing.
+
+        Arguments:
+            end -- ints for start and end of the scan
+            match -- re match pattern or NoneType
+        '''
+
+        # grab sub lengths
+        if isinstance(self.end_sub, six.string_types):
+            sub_end = end + len(self.end_sub)
+        # if re sub
+        elif isinstance(self.end_sub, re._pattern_type):
+            sub_end = match.end()
+        self.remainder = self.remainder[sub_end:]
+
+# ------------------
+#    SCAN PARSER
+# ------------------
+
+class ParseMgf(object):
+    '''Parses MGF file format using series of known subs (specific
+    to each version of MGF file) and stores data in dictionary.
+    MGF Format:
+        BEGIN IONS
+        scan=470
+        PEPMASS=473.456
+        ...
+        475.34\t1800
+        ...
+        END IONS
+    '''
+
+    _start_sub = 'BEGIN IONS'
+    _end_sub = 'END IONS'
+    _pep_mass = r'PEPMASS=[0-9]*\.?[0-9]*'
+    _pep_intensity = r'\t[0-9]*\.?[0-9]*'
+
+    def __init__(self, fileobj, mode, **kwargs):
+        super(ParseMgf, self).__init__()
+
+        # bind instance attributes
+        self.fileobj = fileobj
+        self.scan_finder = ScanFinder(self._start_sub,
+                                      self._end_sub)
+        # set parser mode
+        if mode == 'PAVA':
+            # if read/write new string
+            self.parser = self.process_pava_scan
+            self.re_scan = PAVA_PARSER
+            self.data = OUT_FILE
+            self.tpp_data = kwargs.get('TPP')
+        elif mode == 'TPP':
+            # grab charges, don't replace
+            self.data = {}
+            self.parser = self.process_tpp_scan
+            self.re_scan = TPP_PARSER
+
+    def run(self):
+        '''On start. Reads line by line until StopIterationError.
+        Use of next() over readline() is to control exit loop.
+        '''
+
+        chunk = True
+        while chunk:
+            # grab chunks
+            chunk = self.fileobj.read(4096)
+            scans = self.scan_finder.parse_chunk(chunk)
+            for scan in scans:
+                self.parser(scan)
+
+    # ------------------
+    #        MAIN
+    # ------------------
+
+    def process_pava_scan(self, scan_string):
+        '''Processes a single scan and stores the data in self.data.
+        Stores the meta-data directly and then processes the scan
+        spectra via self.process_data(). Processes PAVA-like formats.
+
+        Arguments:
+            scan_string -- string encompassing the full scan
+        '''
+
+        # grab our match
+        match = self.re_scan.split(scan_string)
+        scan_string = self.replace_pep_mass(scan_string, match)
+        self.write_new_scan(scan_string)
+
+    def replace_pep_mass(self, scan_string, match):
+        '''Replaces the pep_mass within the scan string'''
+
+        # init return
+        num = int(match[3])
+        # grab tpp data
+        tpp_data = self.tpp_data.get(num, {})
+        # format replacements
+        sub = ''
+        repl = ''
+        try:
+            # add in m/z value
+            repl += 'PEPMASS={0}'.format(tpp_data['precursorMz'])
+            sub += self._pep_mass
+            # add in m/z value
+            repl += '\t{0}'.format(tpp_data['precursorIntensity'])
+            sub += self._pep_intensity
+        except KeyError:
+            pass
+        return re.sub(sub, repl, scan_string)
+
+    def process_tpp_scan(self, scan_string):
+        '''Processes a single scan and stores the data in self.data.
+        Stores the meta-data directly and then processes the scan
+        spectra via self.process_data(). Processes TPP-like formats.
+
+        Arguments:
+            scan_string -- string encompassing the full scan
+        '''
+
+        # grab our match
+        match = self.re_scan.split(scan_string)
+        # init return
+        scan = {}
+        num = int(match[3])
+        self.data[num] = scan
+        # mz
+        if match[5] is not None:
+            scan['precursorMz'] = float(match[5])
+        # intensity, if < 1, is 8, otherwise is 7
+        if match[6] is not None:
+            scan['precursorIntensity'] = float(match[6])
+
+    # ------------------
+    #        UTILS
+    # ------------------
+
+    def write_new_scan(self, scan_string):
+        '''Writes the new scan string to file'''
+
+        scan_string = ''.join([scan_string, '\n\n'])
+        # pylint: disable=maybe-no-member
+        self.data.write(scan_string)
+
+# ------------------
+#       MAIN
+# ------------------
+
+def main():
+    '''Runs the core tasks'''
+
+    # parse the tpp
+    tpp_cls = ParseMgf(TPP_SCANS, 'TPP')
+    tpp_cls.run()
+    # parse the pava file
+    pava_cls = ParseMgf(PAVA_SCANS, 'PAVA', TPP=tpp_cls.data)
+    pava_cls.run()
+    # grab shared keys
+
+if __name__ == '__main__':
+
+    # make write file
+    OUT_FILE = open(OUT_PATH, 'w')
+    # call main tasks
+    main()
+    OUT_FILE.close()
