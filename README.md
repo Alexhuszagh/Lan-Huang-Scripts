@@ -11,7 +11,7 @@ General, short, command-line scripts for the Lan Huang Laboratory (written mainl
 ### File Fixing Scripts
 
 > **Goals**
-> Use Trans-Proteomic Pipeline file standards to fix lab-used scripts to improve their implementation. This is because the lab-used scripts may have better performance, better algorithms, but suffer from not being part of a mainstream, maintained software package.
+> Use [Trans-Proteomic Pipeline](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3017125/) file standards to fix lab-used scripts to improve their implementation. This is because the lab-used scripts may have better performance, better algorithms, but suffer from not being part of a mainstream, maintained software package.
 
 1. [Fix Pava](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/fix_pava.py)
     * Corrects mis-assigned charge states due to algorithm differences between the PAVA Raw Distiller and the MSConvert TPP-compatible MGF extractor and writes them back to a copy of the PAVA file.
