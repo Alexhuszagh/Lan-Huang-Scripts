@@ -22,6 +22,10 @@ __author__ = "Alex Huszagh"
 __maintainer__ = "Alex Huszagh"
 __email__ = "ahuszagh@gmail.com"
 
+# KNOWN ISSUES:
+#   With enough proteins entered, the UniProt KB database will send
+#   a 503 gateway error due to refused service.
+
 # This program aims to analyze sequence coverage from a batch list
 # of protein identifiers, with optional custom labels given.
 # This is useful for refining experiments based on various digestive
