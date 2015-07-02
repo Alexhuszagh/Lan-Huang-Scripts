@@ -572,7 +572,7 @@ batchTag.constants();
 // NEW ELEMENT
 // -------------
 
-var batchTagFunctions = {   //eslint-disable-line no-unused-vars
+batchTagFunctions = {   //eslint-disable-line no-unused-vars, no-undef
   "Default": defaultSettings,
   "MS/MS -- Standard": function() {
     "use strict";
