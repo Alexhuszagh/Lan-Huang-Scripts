@@ -718,4 +718,5 @@ function InjectOptions(elementName) {
 // NEW ELEMENT
 // -------------
 
-var inject = new InjectOptions("parent_mass_convert");   //eslint-disable-line no-unused-vars
+var inject = new InjectOptions("parent_mass_convert");
+inject.init();
