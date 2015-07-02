@@ -30,17 +30,27 @@
 // @author          Alex Huszagh <ahuszagh@gmail.com>
 // @description     Protein Prospector scripts increase user efficiency by repeating repetitive clicks. Programmed in the spirit of DRY for data analysis.
 // @domain          http://lanhuang.ucsf.edu/
-// @match           http://prospector2.ucsf.edu/prospector/cgi-bin/msform.cgi?form=batchtag*
-// @match           http://lanhuang.ucsf.edu:18181/prospector/cgi-bin/msform.cgi?form=batchtag*
+// @domain          http://prospector.ucsf.edu/
+// @domain          http://prospector2.ucsf.edu/
+// @match           http://lanhuang.ucsf.edu:18181/prospector/cgi-bin/msform.cgi*
+// @match           http://prospector2.ucsf.edu/prospector/cgi-bin/msform.cgi*
 // @Copyright       2015+, Alex Huszagh
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/batch_tag.js?token=<USERTOKEN>
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/inject.js?token=<USERTOKEN>
+// @grant           unsafeWindow
 // @run-at          document-idle
 // ==/UserScript==
 
 // ESLint settings
 /*eslint no-undef:0 */
+/*global document:true*/
 
+// Grab the header for the form
+var innerText = document.getElementsByClassName("form_name")[0].innerText;
 
-//var inject = new InjectOptions("parent_mass_convert", batchTagFunctions);
-//inject.init();
+// Check to see
+if (innerText.substring() === "Batch-Tag") {
+  var inject = new InjectOptions("parent_mass_convert",
+                                 unsafeWindow.batchTagFunctions);
+  inject.init();
+}

@@ -26,7 +26,7 @@
 
 // ESLint settings
 /*eslint no-underscore-dangle:0, curly: 2*/
-/*global location b:true, document b:true, DEFAULT_MODS b:true*/
+/*global location document:true*/
 
 function InjectOptions(elementName, functions) {   //eslint-disable-line no-unused-vars
   "use strict";

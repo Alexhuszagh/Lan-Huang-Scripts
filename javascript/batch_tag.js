@@ -29,7 +29,7 @@
 
 // ESLint settings
 /*eslint no-underscore-dangle:0, curly: 2*/
-/*global location b:true, document b:true, DEFAULT_MODS b:true*/
+/*global location document:true*/
 
 // -------------
 //   CONSTANTS
