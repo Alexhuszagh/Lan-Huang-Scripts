@@ -42,5 +42,5 @@
 /*eslint no-undef:0 */
 
 
-var inject = new InjectOptions("parent_mass_convert", batchTagFunctions);
-inject.init();
+//var inject = new InjectOptions("parent_mass_convert", batchTagFunctions);
+//inject.init();
