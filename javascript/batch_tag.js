@@ -605,7 +605,7 @@ var functions = {
   }
 };
 
-function InjectOptions(elementName) {
+function InjectOptions(elementName) {   //eslint-disable-line no-unused-vars
   "use strict";
   /*
    * Adds a DOM select-one element to the Batch Tag Search page,
