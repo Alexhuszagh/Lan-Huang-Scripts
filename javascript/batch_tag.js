@@ -81,9 +81,9 @@ var trypsin = function() {
 
 var functions = {
   "Default": defaultSettings,
-  "MS2 Standard": ms2Standard,
-  "DSSO Standard": dssoStandard,
-  "Trypsin": trypsin
+  "MS/MS -- Standard": ms2Standard,
+  "XLMS -- DSSO Standard": dssoStandard,
+  "Protease -- Trypsin": trypsin
 }
 
 // -------------
