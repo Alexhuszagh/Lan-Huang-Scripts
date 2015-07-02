@@ -24,7 +24,7 @@
 
 // ==UserScript==
 // @id              Protein Prospector Scripts
-// @name            Protein Prospector Scripts -- Batch Tag
+// @name            Protein Prospector Scripts
 // @namespace       https://github.com/Alexhuszagh/
 // @version         0.0.1
 // @author          Alex Huszagh <ahuszagh@gmail.com>
@@ -34,11 +34,13 @@
 // @match           http://lanhuang.ucsf.edu:18181/prospector/cgi-bin/msform.cgi?form=batchtag*
 // @Copyright       2015+, Alex Huszagh
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/batch_tag.js?token=<USERTOKEN>
+// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/inject.js?token=<USERTOKEN>
 // @run-at          document-idle
 // ==/UserScript==
 
 // ESLint settings
 /*eslint no-undef:0 */
 
-var inject = new InjectOptions("parent_mass_convert");
+
+var inject = new InjectOptions("parent_mass_convert", batchTagFunctions);
 inject.init();
