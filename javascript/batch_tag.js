@@ -1,17 +1,17 @@
 /* Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
-
-xlDiscoverer is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This xlDiscoverer is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this xlDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // -------------
@@ -19,34 +19,63 @@ along with this xlDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 // -------------
 
 /*
-Automated scripts to configure and edit "Batch Tag" and "Batch Tag Web"
-settings.
-
-This adds a HTML DOM "settings" element into the Protein Prospector Batch Tag
-site, enabling cust selectable elements.
+ * Automated scripts to configure and edit "Batch Tag" and "Batch Tag Web"
+ * settings on Protein Prospector. Can be configured into a TamperMonkey
+ * script.
+ *
+ * This adds a HTML DOM "settings" element into the Protein Prospector
+ * Batch Tag site, enabling customizing elements upon selection.
 */
+
+// ESLint settings
+/*eslint no-underscore-dangle:0, curly: 2*/
+/*global location b:true, document b:true, DEFAULT_MODS b:true*/
 
 // -------------
 //   CONSTANTS
 // -------------
 
-var DEFAULT_MODS = [
-  'Acetyl (Protein N-term)',
-  'Acetyl+Oxidation (Protein N-term M)',
-  'Deamidated (N)',
-  'Gln->pyro-Glu (N-term Q)',
-  'Met-loss (Protein N-term M)',
-  'Met-loss+Acetyl (Protein N-term M)',
-  'Oxidation (M)'
+var DEFAULT_MODS = [    //eslint-disable-line no-unused-vars, no-undef
+  /*
+   * Sets the default mod configurations for standard searches.
+   * Provides a baseline for configurations to select in the DOM select
+   * elemeents.
+  */
+  "Acetyl (Protein N-term)",
+  "Acetyl+Oxidation (Protein N-term M)",
+  "Deamidated (N)",
+  "Gln->pyro-Glu (N-term Q)",
+  "Met-loss (Protein N-term M)",
+  "Met-loss+Acetyl (Protein N-term M)",
+  "Oxidation (M)"
 ];
 
 var DSSO = [
-  'XL:A-Alkene (Protein N-term)',
-  'XL:A-Alkene (Uncleaved K)',
-  'XL:A-Sulfenic (Protein N-term)',
-  'XL:A-Sulfenic (Uncleaved K)',
-  'XL:A-Thiol(Unsaturated) (Protein N-term)',
-  'XL:A-Thiol(Unsaturated) (Uncleaved K)'
+  /*
+   * Sets the default mod configurations for DSSO searches.
+  */
+  "XL:A-Alkene (Protein N-term)",
+  "XL:A-Alkene (Uncleaved K)",
+  "XL:A-Sulfenic (Protein N-term)",
+  "XL:A-Sulfenic (Uncleaved K)",
+  "XL:A-Thiol(Unsaturated) (Protein N-term)",
+  "XL:A-Thiol(Unsaturated) (Uncleaved K)"
+];
+
+var SILAC_13C6K = [
+  /*
+   * Sets the default mod configurations for MS/MS SILAC 13C(6) searches.
+  */
+  "Label:13C(6)15N(2) (K)"
+];
+
+var SILAC_13C6K_DSSO = [
+  /*
+   * Sets the default mod configurations for DSSO SILAC 13C(6) 15N(2) searches.
+  */
+  "Label:13C(6)15N(2)+XL:A-Alkene (Uncleaved K)",
+  "Label:13C(6)15N(2)+XL:A-Sulfenic (Uncleaved K)",
+  "Label:13C(6)15N(2)+XL:A-Thiol (Uncleaved K)"
 ];
 
 // -------------
@@ -54,45 +83,96 @@ var DSSO = [
 // -------------
 
 var defaultSettings = function() {
-}
+  /*
+   * Reloads current webpage to reset settings upon loading
+  */
+  "use strict";
+  location.reload();
+};
 
-var ms2Standard = function() {
+var ms2Standard = function(cls) {
+  /*
+   * Sets the default MS/MS search settings, assuming full Carbamidomethyl
+   * incorporation.
+  */
+  "use strict";
   // Set the constant mods
-  batch_tag.set_constant_mods(['Carbamidomethyl (C)']);
-  batch_tag.set_variable_mods(DEFAULT_MODS);
+  cls.setConstantMods(["Carbamidomethyl (C)"]);
+  cls.setVariableMods(DEFAULT_MODS);
   // Set the Protease/Missed Cleavage stuff
-  batch_tag.set_protease(["missed"], [2]);
-  batch_tag.set_max_mods(2);
-}
+  cls.setProtease(["missed"], [2]);
+  cls.setMaxMods(2);
+};
 
-var dssoStandard = function() {
+var ms2Silac = function(cls) {
+  /*
+   * Sets the MS/MS search settings with 13C(6) 15N(2)-K SILAC labeling.
+  */
+  "use strict";
+  // Call standard MS/MS settings
+  ms2Standard(cls);
+  cls.setVariableMods(SILAC_13C6K, false);
+};
+
+var dssoStandard = function(cls) {
+  /*
+   * Sets the search settings for DSSO (XLMS).
+  */
+  "use strict";
   // Set the constant mods
-  batch_tag.set_constant_mods(['Carbamidomethyl (C)']);
-  batch_tag.set_variable_mods(DEFAULT_MODS.concat(DSSO));
+  cls.setConstantMods(["Carbamidomethyl (C)"]);
+  cls.setVariableMods(DEFAULT_MODS.concat(DSSO));
   // Set the Protease/Missed Cleavage stuff
-  batch_tag.set_protease(["missed"], [4]);
-  batch_tag.set_max_mods(4);
-}
+  cls.setProtease(["missed"], [4]);
+  cls.setMaxMods(4);
+};
 
-var trypsin = function() {
-  batch_tag.set_protease(["enzyme", "nonSpecific"],
-                         ["Trypsin", "at 0 termini"])
-}
+var silacDsso = function(cls) {
+  /*
+   * Sets the search settings for DSSO (XLMS) with 13C(6) 15N(2)-K
+   * SILAC labeling.
+  */
+  "use strict";
+  // Call standard DSSO settings
+  dssoStandard(cls);
+  var mods = DEFAULT_MODS.concat(SILAC_13C6K).concat(SILAC_13C6K_DSSO);
+  cls.setVariableMods(mods);
+};
 
-var functions = {
-  "Default": defaultSettings,
-  "MS/MS -- Standard": ms2Standard,
-  "XLMS -- DSSO Standard": dssoStandard,
-  "Protease -- Trypsin": trypsin
-}
+var backbone15NDsso = function(cls) {
+  /*
+   * Sets the search settings for DSSO (XLMS) with ubiquitous
+   * backbone 15N labeling.
+  */
+  "use strict";
+  // Call standard DSSO settings
+  dssoStandard(cls);
+};
+
+var trypsin = function(cls) {
+  /*
+   * Sets the default configurations for Proteins digested with trypsin.
+  */
+  "use strict";
+  cls.setProtease(["enzyme", "nonSpecific"],
+                  ["Trypsin", "at 0 termini"]);
+};
 
 // -------------
-//    OBJECTS
+//  DOM STORAGE
 // -------------
 
 // Create core Batch Tag class
 function BatchTag() {
-
+  "use strict";
+  /*
+   * Contains the core DOM elements of the BatchTag website stored within the
+   * DATA subheadings.
+   *
+   * Private methods are then defined to access individual members, and then
+   * custom settings these elements can be done via setValue() or various
+   * other functions, along with pre-defined settings such as "constants".
+  */
   // -------------
   //     DATA
   // -------------
@@ -103,17 +183,17 @@ function BatchTag() {
     "user": document.getElementsByName( "user_protein_sequence")[0],
     "species": document.getElementsByName("species")[0],
     "nTermLim": document.getElementsByName("n_term_aa_limit")[0]
-  }
+  };
 
   // grab protease conditions
   this._protease = {
     "enzyme": document.getElementsByName("enzyme")[0],
     "nonSpecific": document.getElementsByName("allow_non_specific")[0],
     "missed": document.getElementsByName("missed_cleavages")[0]
-  }
+  };
 
   // grab file name identifiers
-  this._output_filename = document.getElementsByName("output_filename")[0];
+  this._outputFilename = document.getElementsByName("output_filename")[0];
 
   // grab our mod lists
   this._mods = {
@@ -153,13 +233,13 @@ function BatchTag() {
       "mod_5_accurate_mass")[0],
     "mod_6_accurate_mass": document.getElementsByName(
       "mod_6_accurate_mass")[0],
-    "max_mods": document.getElementsByName("msms_max_modifications")[0],
+    "maxMods": document.getElementsByName("msms_max_modifications")[0],
     "msms_max_peptide_permutations": document.getElementsByName(
-      "msms_max_peptide_permutations")[0],
-  }
+      "msms_max_peptide_permutations")[0]
+  };
 
   // grab our mass mod lists
-  this._mass_mods = {
+  this._massMods = {
     "type": document.getElementsByName("mod_range_type")[0],
     "start": document.getElementsByName("mod_start_nominal")[0],
     "end": document.getElementsByName("mod_end_nominal")[0],
@@ -171,27 +251,27 @@ function BatchTag() {
     "modCTerm": document.getElementsByName("mod_c_term")[0],
     "uncleaved": document.getElementsByName("mod_uncleaved")[0],
     "neutralLoss": document.getElementsByName("mod_neutral_loss")[0]
-  }
+  };
 
   // grab our crosslinking mod attributes
   this._crosslinking = {
     "searchType": document.getElementsByName("link_search_type")[0],
     "maxHits": document.getElementsByName("max_saved_tag_hits")[0]
-  }
+  };
 
   // grab our link param attributes
   this._links = {
     "link_aa": document.getElementsByName("link_aa")[0],
     "bridge": document.getElementsByName("bridge_composition")[0]
-  }
+  };
 
   // grab our matrix modification attributes
   this._matrix = {
-    "boxes": document.getElementsByName("msms_search_type"),
-  }
+    "boxes": document.getElementsByName("msms_search_type")
+  };
 
   // grab our presearch parameters
-  this._pre_search = {
+  this._preSearch = {
     // Base element
     "element": document.getElementById("ejb_2")[0],
     "taxon": document.getElementsByName("species_names")[0],
@@ -205,7 +285,7 @@ function BatchTag() {
     "prog": document.getElementsByName("input_program_name")[0],
     "input_name": document.getElementsByName("input_filename")[0],
     "remove": document.getElementsByName("species_remove")[0]
-  }
+  };
 
   // Grab lower left objects
   this._other = {
@@ -219,21 +299,22 @@ function BatchTag() {
       "fragment_masses_tolerance_units")[0],
     "error": document.getElementsByName(
       "msms_parent_mass_systematic_error")[0]
-  }
+  };
 
   // -------------
   //     CORE
   // -------------
 
-  // sets the constant values for the site
   this.constants = function() {
-    // This function sets the constants for the Batch Tag Search
-    // These values should never change
-
+    /*
+     * This function sets the default constants for the Batch Tag Search.
+     * These values are typically those that never change, and therefore
+     * should never be toggled.
+    */
     // Define key values
     var allValues = {
       "_database": {
-        "nTermLim": "",
+        "nTermLim": ""
       },
       "_other": {
         "mass": "monoisotopic",
@@ -270,13 +351,13 @@ function BatchTag() {
         "mod_6_accurate_mass": "",
         "msms_max_peptide_permutations": ""
       },
-      "_mass_mods": {
+      "_massMods": {
         "type": "Da",
         "start": "-100",
         "end": "100",
         "defect": "0.00048",
         "mod_comp_ion": Array.apply(null, new Array(20)).map(
-          Boolean.prototype.valueOf,false),
+          Boolean.prototype.valueOf, false),
         "nTermType": "Peptide",
         "modNTerm": false,
         "cTermType": "Peptide",
@@ -288,7 +369,7 @@ function BatchTag() {
         "searchType": "No Link",
         "maxHits": "1000"
       },
-      "_pre_search": {
+      "_preSearch": {
         "low_mw": 1000,
         "high_mw": 125000,
         "full_mw_range": true,
@@ -306,198 +387,335 @@ function BatchTag() {
       },
       "_matrix": {
         "boxes": Array.apply(null, new Array(3)).map(
-          Boolean.prototype.valueOf,false)
+          Boolean.prototype.valueOf, false)
       }
-    }
+    };
     // Automatically set values for all
-    for (tableName in allValues) {
+    for (var tableName in allValues) {
       // grab table with attributes
-      table = allValues[tableName];
-      for (propertyName in table) {
+      var table = allValues[tableName];
+      for (var propertyName in table) {
         // Set all property values
         var attr = this[tableName][propertyName];
         var value = table[propertyName];
-        this.set_value(attr, value);
+        this.setValue(attr, value);
       }
     }
-  }
+  };
 
-  // this sets the protease attributes
-  // Use:
-  // BatchTag.set_protease(["missed"], [5]);
-  this.set_protease = function(keys, values) {
+  this.setProtease = function(keys, values) {
+    /*
+     * this sets the protease attributes
+     * Use:
+     * BatchTag.setProtease(["missed"], [5]);
+    */
     for (var i = 0; i < keys.length; i++) {
       // Grab key
       var key = keys[i];
       // Grab attr/value pair
       var attr = this._protease[key];
       var value = values[i];
-      this.set_value(attr, value);
+      this.setValue(attr, value);
     }
-  }
+  };
 
-  // Sets the max mod counts
-  // Use:
-  // BatchTag.set_max_mods(4);
-  this.set_max_mods = function(count) {
-    this.set_value(this._mods['max_mods'], count);
-  }
+  this.setMaxMods = function(count) {
+    /*
+     * Sets the max mod counts
+     * Use:
+     * BatchTag.setMaxMods(4);
+    */
+    this.setValue(this._mods.maxMods, count);
+  };
 
-  // this sets the constant mods by attribute name
-  // Use:
-  // BatchTag.set_constant_mods(['Cyano (C)', 'Cys->Dha (C)']);
-  this.set_constant_mods = function(values) {
-    this._set_mods(values, "const")
-  }
-
-  // this sets the variable mods by attribute name
-  // BatchTag.set_variable_mods(['Cyano (C)', 'Cys->Dha (C)']);
-  this.set_variable_mods = function(values) {
-    this._set_mods(values, "variable")
-  }
-
-  this._set_mods = function(values, key) {
+  this.setConstantMods = function(values, blank) {
+    /*
+     * This sets the constant mods by attribute name.
+     * Use:
+     * BatchTag.setConstantMods(["Cyano (C)", "Cys->Dha (C)"]);
+    */
     // first need to blank all mods in that key
-    this._blank_select_box(this._mods[key])
+    var toBlank = blank || true;
+    this._setMods(values, "const", toBlank);
+  };
 
+  this.setVariableMods = function(values, blank) {
+    /*
+     * This sets the variable mods by attribute name
+     * BatchTag.setVariableMods([Cyano (C), "Cys->Dha (C)"]);
+     * first need to blank all mods in that key
+    */
+    var blankMods = blank || true;
+    this._setMods(values, "variable", blankMods);
+  };
+
+  this._setMods = function(values, key, blank) {
+    /*
+     * PRIVATE, full functionality can be called from
+     * this.setVariableMods or this.setConstantMods
+     *
+     * Sets the current mods list, with keys and value
+     * and grabs the attribute from the key to the stored mod type.
+    */
+    // pairs to select within the
+    if (blank) {
+      this._blankSelectBox(this._mods[key]);
+    }
     // now need to set all the values
-    this._set_select_multiple(this._mods[key], values)
-  }
+    this._setSelectMultiple(this._mods[key], values);
+  };
 
   // -------------
   //  BLANK UTILS
   // -------------
 
-  this._blank_select_box = function(attr) {
+  this._blankSelectBox = function(attr) {
+    /*
+     * Blanks all entries within the DOM select element
+     * Only, of course, works with select-multiple DOM elements.
+     *
+     * Blanks from a given DOM element attr.
+    */
     // blanks
     for (var i = 0; i < attr.length; i++) {
       attr[i].selected = false;
     }
-  }
+  };
 
   // -------------
   //     UTILS
   // -------------
 
-  // finds the HTML object type and sets the value
-  this.set_value = function(attr, value) {
+  this.setValue = function(attr, value) {
+    /*
+     * Finds the HTML object type and sets the ELEMENT.value
+     * ELEMENT.selected, or ELEMENT.checked state.
+     *
+     * Use: BatchTag.setValue(domCheckBox, false);
+    */
+    // DOM Select Elements
     if (attr.type === "select-one") {
-     this._set_select_box(attr, value);
+     this._setSelectBox(attr, value);
     }
+    // DOM Text Elements
     else if (attr.type === "text") {
-      this._set_text_value(attr, value);
+      this._setTextValue(attr, value);
     }
+    // DOM CheckBox Elements
     else if (attr.type === "checkbox") {
-      this._set_checkbox(attr, value);
+      this._setCheckBox(attr, value);
     }
-    else if (typeof attr.length == 'number'
-             && typeof attr.item == 'function')
+    // DOM NodeList Elements
+    // Uses duck-typing for IE compatability issues
+    else if (typeof attr.length === "number"
+             && typeof attr.item === "function")
     {
       for (var i = 0; i < attr.length; i++) {
         var tmpAttr = attr[i];
         var tmpValue = value[i];
-        this.set_value(tmpAttr, tmpValue);
+        this.setValue(tmpAttr, tmpValue);
       }
-      // this._set_checkbox(attr, value)
+      // this._setCheckBox(attr, value)
     }
-  }
+  };
 
   // This toggles the selection for a given HTML "select-one" box
-  this._set_select_box = function(attr, value) {
+  this._setSelectBox = function(attr, value) {
+    /*
+     * Sets the selected elements in a given DOM select element..
+     * If the DOM select element is select-one, only one value
+     * should be passed, since each new selection overrides an old.
+    */
     // Iterate over entries in box
     for (var i = 0; i < attr.length; i++) {
       // Check if default value is desired value
-      if (attr[i].value == value) {
+      if (attr[i].value == value) {   // eslint-disable-line eqeqeq
         attr[i].selected = true;
       }
     }
-  }
+  };
 
   // This sets the selection for a given HTML "select-multiple" box
-  this._set_select_multiple = function(attr, values) {
-    // Iterate over values and call this._set_select_box()
+  this._setSelectMultiple = function(attr, values) {
+    /*
+     * Iterates over all values and then changes the value's selection
+     * in a given DOM select element.
+    */
+    // Iterate over values and call this._setSelectBox()
     for (var i = 0; i < values.length; i++) {
       // All the options are listed 0->6, need to check for numeric operties
       var value = values[i];
-      this._set_select_box(attr, value)
+      this._setSelectBox(attr, value);
     }
-  }
+  };
 
   // This sets the HTML text value for a given attribute
-  this._set_text_value = function(attr, value) {
+  this._setTextValue = function(attr, value) {
     attr.value = value;
-  }
+  };
 
   // This sets the HTML checkstate for a checkbox
-  this._set_checkbox = function(attr, value) {
+  this._setCheckBox = function(attr, value) {
     if (value) {
       attr.checked = true;
     }
     else {
       attr.checked = false;
     }
-  }
+  };
 }
 
-// Injects an option list onto the webpage
-function InjectOptions() {
+// -------------
+//     INIT
+// -------------
+
+var batchTag = new BatchTag();
+batchTag.constants();
+
+// -------------
+//   CREATE
+// NEW ELEMENT
+// -------------
+
+var functions = {
+  "Default": defaultSettings,
+  "MS/MS -- Standard": function() {
+    "use strict";
+    ms2Standard(batchTag);
+  },
+  "MS/MS -- SILAC 13C(6) 15N(2) K": function() {
+    "use strict";
+    ms2Silac(batchTag);
+  },
+  "XLMS -- DSSO Standard": function() {
+    "use strict";
+    dssoStandard(batchTag);
+  },
+  "XLMS -- DSSO SILAC 13C(6) 15N(2) K": function() {
+    "use strict";
+    silacDsso(batchTag);
+  },
+  "XLMS -- 15N Backbone DSSO": function() {
+    "use strict";
+    backbone15NDsso(batchTag);
+  },
+  "Protease -- Trypsin": function() {
+    "use strict";
+    trypsin(batchTag);
+  }
+};
+
+function InjectOptions(elementName) {
+  "use strict";
+  /*
+   * Adds a DOM select-one element to the Batch Tag Search page,
+   * which contains configurable elements to set default parameters.
+   *
+   * Specifically adds the entry after elementName, which it grabs the
+   * first entry from the DOM with that name.
+  */
+
+  // -------------
+  // NEW ELEMENTS
+  // -------------
+
+  this._newOptions = function(newElement, textNodeName) {
+    /*
+     * Creates a new DOM element for configurable user options.
+    */
+    var presetOptions = document.createElement(newElement);
+    presetOptions.appendChild(document.createTextNode(textNodeName));
+    presetOptions.appendChild(document.createElement("br"));
+
+    return presetOptions;
+  };
+
+  this._addSelect = function() {
+    /*
+     * Adds a new select element to the DOM and adds an eventListen for
+     * signal changes.
+    */
+    var newSelect = document.createElement("select");
+    // Need to set, since inside the event listener, will be missing
+    var this_ = this;
+    newSelect.addEventListener("change", function () {
+      // Grab the currently selected item
+      var propertyName = this_._getSelected(newSelect).innerHTML;
+      // Grab element function and call
+      var func = functions[propertyName];
+      func();
+    });
+
+    return newSelect;
+  };
+
+  this._addOptions = function(configurations, select) {
+    /*
+     * Adds user configuration settings to a widget from a function list
+     *
+     * Converts the configuration list to a series of bound options
+     * in a select DOM element.
+    */
+
+    // Populate new element -- Init counter
+    var i = 0;
+    for (var propertyName in functions) {
+      // Create option
+      var opt = document.createElement("option");
+      opt.value = i;
+      opt.innerHTML = propertyName;
+      select.appendChild(opt);
+      i++;
+    }
+    return;
+  };
 
   // -------------
   //     UTILS
   // -------------
 
-  // This gets the currently selected item from a "select-one" element.
-  this._get_selected = function(attr) {
+  this._getSelected = function(ele) {
+    /*
+     * Grabs the currently selected element from a DOM element
+     * if the DOM element is ele.type === "select-one".
+    */
     // Iterate over entries in box
-    for (var i = 0; i < attr.length; i++) {
+    for (var i = 0; i < ele.length; i++) {
       // Check if default value is desired value
-      if (attr[i].selected == true) {
-        // return attr[i]
-        return attr[i]
+      if (ele[i].selected === true) {
+        return ele[i];
       }
     }
-  }
-  // Inject a new element with preset options
-  // document.c
-  //document.appendChild(this.newElement);
+  };
 
   // -------------
-  //   NEW ELE
+  //     INIT
   // -------------
 
-  // Create a new element
-  this.presetOptions = document.createElement("presetOptions");
-  this.presetOptions.appendChild(document.createTextNode("Custom Lists"));
-  this.presetOptions.appendChild(document.createElement("br"));
-  var newSelect = document.createElement('select');
-  // Need to set, since inside the event listener, will be missing
-  var this_ = this;
-  newSelect.addEventListener("change", function (e) {
-    // Grab the currently selected item
-    var propertyName = this_._get_selected(newSelect).innerHTML;
-    // Grab element function and call
-    var func = functions[propertyName];
-    func();
-  });
-  this.presetOptions.appendChild(newSelect);
-  // Grab parent's location
-  var ele = document.getElementsByName("parent_mass_convert")[0];
-  var parent = ele.offsetParent;
-  // Add new separator and add element
-  for (var i = 0; i < 5; i++) {
-    parent.appendChild(document.createElement("br"));
-  }
-  parent.appendChild(this.presetOptions);
-  // Populate new element
-  for (var propertyName in functions) {
-    // Create option
-    var opt = document.createElement("option");
-    opt.value = i;
-    opt.innerHTML = propertyName;
-    newSelect.appendChild(opt);
-  }
+  this.init = function () {
+    /*
+     * Initializes the core widget list
+    */
+    // Create a new element
+    this.presetOptions = this._newOptions("presetOptions", "Custom Lists");
+    var newSelect = this._addSelect();
+    this.presetOptions.appendChild(newSelect);
+    // Grab parent"s location
+    var ele = document.getElementsByName(elementName)[0];
+    var parent = ele.offsetParent;
+    // Add new separator and add element
+    for (var i = 0; i < 5; i++) {
+      parent.appendChild(document.createElement("br"));
+    }
+    // Now need to add the options and add to widget
+    this._addOptions(functions, newSelect);
+    parent.appendChild(this.presetOptions);
+  };
 }
 
-var batch_tag = new BatchTag();
-var inject = new InjectOptions();
-batch_tag.constants();
+// -------------
+//   INJECT
+// NEW ELEMENT
+// -------------
+
+var inject = new InjectOptions("parent_mass_convert");   //eslint-disable-line no-unused-vars

@@ -10,6 +10,7 @@ These scripts should be fully supported on any Python-supported operating system
     - [File Fixing Scripts](#file-fixing-scripts)
     - [Automated Data Analysis](#automated-data-analysis)
   - [JavaScript](#javascript)
+    - [Protein Prospector](#protein-prospector)
 
 ## Utilities
 
@@ -31,3 +32,8 @@ These scripts should be fully supported on any Python-supported operating system
     * Checks the sequence coverage for a list of UniProt IDs given by the user in a list of files supplied for the user. These can have optional labels, if desired. It then outputs the sequence coverage of each peptide using '+'/' ', in a format similar to ClustalW.
 
 ### JavaScript
+
+#### Protein Prospector
+
+1. [Batch Tag](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/javascript/batch_tag.js)
+    * Injects an HTML Select Form Attribute into the Protein Prospector webpage, allowing users to toggle between common settings in order to rapidly select user configurations or output report formats.
