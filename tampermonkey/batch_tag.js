@@ -28,7 +28,7 @@
 // @namespace       https://github.com/Alexhuszagh/
 // @version         0.0.1
 // @author          Alex Huszagh <ahuszagh@gmail.com>
-// @description     Protein Prospector scripts increase user efficiency by repeating repetitive clicks. Programmed in the spirit of DRY for data analysis..
+// @description     Protein Prospector scripts increase user efficiency by repeating repetitive clicks. Programmed in the spirit of DRY for data analysis.
 // @domain          http://lanhuang.ucsf.edu/
 // @match           http://prospector2.ucsf.edu/prospector/cgi-bin/msform.cgi?form=batchtag*
 // @match           http://lanhuang.ucsf.edu:18181/prospector/cgi-bin/msform.cgi?form=batchtag*

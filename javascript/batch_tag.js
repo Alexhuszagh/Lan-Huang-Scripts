@@ -176,129 +176,124 @@ function BatchTag() {
   // -------------
   //     DATA
   // -------------
-  // grab our databases
-  this._database = {
-    "ds": document.getElementsByName("database")[0],
-    "dna": document.getElementsByName("dna_frame_translation")[0],
-    "user": document.getElementsByName( "user_protein_sequence")[0],
-    "species": document.getElementsByName("species")[0],
-    "nTermLim": document.getElementsByName("n_term_aa_limit")[0]
-  };
-
-  // grab protease conditions
-  this._protease = {
-    "enzyme": document.getElementsByName("enzyme")[0],
-    "nonSpecific": document.getElementsByName("allow_non_specific")[0],
-    "missed": document.getElementsByName("missed_cleavages")[0]
-  };
-
-  // grab file name identifiers
-  this._outputFilename = document.getElementsByName("output_filename")[0];
-
-  // grab our mod lists
-  this._mods = {
-    "const": document.getElementsByName("const_mod")[0],
-    "variable": document.getElementsByName("msms_mod_AA")[0],
-    // Variable mod labels
-    "mod_1_label": document.getElementsByName("mod_1_label")[0],
-    "mod_2_label": document.getElementsByName("mod_2_label")[0],
-    "mod_3_label": document.getElementsByName("mod_3_label")[0],
-    "mod_4_label": document.getElementsByName("mod_4_label")[0],
-    "mod_5_label": document.getElementsByName("mod_5_label")[0],
-    "mod_6_label": document.getElementsByName("mod_6_label")[0],
-    // Variable Mod Specificty
-    "mod_1_specificity": document.getElementsByName("mod_1_specificity")[0],
-    "mod_2_specificity": document.getElementsByName("mod_2_specificity")[0],
-    "mod_3_specificity": document.getElementsByName("mod_3_specificity")[0],
-    "mod_4_specificity": document.getElementsByName("mod_4_specificity")[0],
-    "mod_5_specificity": document.getElementsByName("mod_5_specificity")[0],
-    "mod_6_specificity": document.getElementsByName("mod_6_specificity")[0],
-    // Variable Mod Composition
-    "mod_1_composition": document.getElementsByName("mod_1_composition")[0],
-    "mod_2_composition": document.getElementsByName("mod_2_composition")[0],
-    "mod_3_composition": document.getElementsByName("mod_3_composition")[0],
-    "mod_4_composition": document.getElementsByName("mod_4_composition")[0],
-    "mod_5_composition": document.getElementsByName("mod_5_composition")[0],
-    "mod_6_composition": document.getElementsByName("mod_6_composition")[0],
-    // Variable Mod Exact Mass
-    "mod_1_accurate_mass": document.getElementsByName(
-      "mod_1_accurate_mass")[0],
-    "mod_2_accurate_mass": document.getElementsByName(
-      "mod_2_accurate_mass")[0],
-    "mod_3_accurate_mass": document.getElementsByName(
-      "mod_3_accurate_mass")[0],
-    "mod_4_accurate_mass": document.getElementsByName(
-      "mod_4_accurate_mass")[0],
-    "mod_5_accurate_mass": document.getElementsByName(
-      "mod_5_accurate_mass")[0],
-    "mod_6_accurate_mass": document.getElementsByName(
-      "mod_6_accurate_mass")[0],
-    "maxMods": document.getElementsByName("msms_max_modifications")[0],
-    "msms_max_peptide_permutations": document.getElementsByName(
-      "msms_max_peptide_permutations")[0]
-  };
-
-  // grab our mass mod lists
-  this._massMods = {
-    "type": document.getElementsByName("mod_range_type")[0],
-    "start": document.getElementsByName("mod_start_nominal")[0],
-    "end": document.getElementsByName("mod_end_nominal")[0],
-    "defect": document.getElementsByName("mod_defect")[0],
-    "mod_comp_ion": document.getElementsByName("mod_comp_ion"),
-    "nTermType": document.getElementsByName("mod_n_term_type")[0],
-    "modNTerm": document.getElementsByName("mod_n_term")[0],
-    "cTermType": document.getElementsByName("mod_c_term_type")[0],
-    "modCTerm": document.getElementsByName("mod_c_term")[0],
-    "uncleaved": document.getElementsByName("mod_uncleaved")[0],
-    "neutralLoss": document.getElementsByName("mod_neutral_loss")[0]
-  };
-
-  // grab our crosslinking mod attributes
-  this._crosslinking = {
-    "searchType": document.getElementsByName("link_search_type")[0],
-    "maxHits": document.getElementsByName("max_saved_tag_hits")[0]
-  };
-
-  // grab our link param attributes
-  this._links = {
-    "link_aa": document.getElementsByName("link_aa")[0],
-    "bridge": document.getElementsByName("bridge_composition")[0]
-  };
-
-  // grab our matrix modification attributes
-  this._matrix = {
-    "boxes": document.getElementsByName("msms_search_type")
-  };
-
-  // grab our presearch parameters
-  this._preSearch = {
-    // Base element
-    "element": document.getElementById("ejb_2")[0],
-    "taxon": document.getElementsByName("species_names")[0],
-    "low_mw": document.getElementsByName("msms_prot_low_mass")[0],
-    "high_mw": document.getElementsByName("msms_prot_high_mass")[0],
-    "full_mw_range": document.getElementsByName("msms_full_mw_range")[0],
-    "low_pi": document.getElementsByName("low_pi")[0],
-    "high_pi": document.getElementsByName("high_pi")[0],
-    "full_pi_range": document.getElementsByName("full_pi_range")[0],
-    "from_file": document.getElementsByName("results_from_file")[0],
-    "prog": document.getElementsByName("input_program_name")[0],
-    "input_name": document.getElementsByName("input_filename")[0],
-    "remove": document.getElementsByName("species_remove")[0]
-  };
-
-  // Grab lower left objects
-  this._other = {
-    "mass": document.getElementsByName("parent_mass_convert")[0],
-    "charge": document.getElementsByName("msms_precursor_charge_range")[0],
-    "par_tol": document.getElementsByName("msms_parent_mass_tolerance")[0],
-    "par_tol_units": document.getElementsByName(
-      "msms_parent_mass_tolerance_units")[0],
-    "frag_tol": document.getElementsByName("fragment_masses_tolerance")[0],
-    "frag_tol_units": document.getElementsByName(
-      "fragment_masses_tolerance_units")[0],
-    "error": document.getElementsByName(
-      "msms_parent_mass_systematic_error")[0]
+  this._data = {
+    // grab our databases
+    "database": {
+      "ds": document.getElementsByName("database")[0],
+      "dna": document.getElementsByName("dna_frame_translation")[0],
+      "user": document.getElementsByName( "user_protein_sequence")[0],
+      "species": document.getElementsByName("species")[0],
+      "nTermLim": document.getElementsByName("n_term_aa_limit")[0]
+    },
+    "protease": {
+      // grab protease conditions
+      "enzyme": document.getElementsByName("enzyme")[0],
+      "nonSpecific": document.getElementsByName("allow_non_specific")[0],
+      "missed": document.getElementsByName("missed_cleavages")[0]
+    },
+    "fileNames": {
+      // grab file name identifiers
+      "output": document.getElementsByName("output_filename")[0]
+    },
+    "mods": {
+      // grab our mod lists
+      "const": document.getElementsByName("const_mod")[0],
+      "variable": document.getElementsByName("msms_mod_AA")[0],
+      // Variable mod labels
+      "mod_1_label": document.getElementsByName("mod_1_label")[0],
+      "mod_2_label": document.getElementsByName("mod_2_label")[0],
+      "mod_3_label": document.getElementsByName("mod_3_label")[0],
+      "mod_4_label": document.getElementsByName("mod_4_label")[0],
+      "mod_5_label": document.getElementsByName("mod_5_label")[0],
+      "mod_6_label": document.getElementsByName("mod_6_label")[0],
+      // Variable Mod Specificty
+      "mod_1_specificity": document.getElementsByName("mod_1_specificity")[0],
+      "mod_2_specificity": document.getElementsByName("mod_2_specificity")[0],
+      "mod_3_specificity": document.getElementsByName("mod_3_specificity")[0],
+      "mod_4_specificity": document.getElementsByName("mod_4_specificity")[0],
+      "mod_5_specificity": document.getElementsByName("mod_5_specificity")[0],
+      "mod_6_specificity": document.getElementsByName("mod_6_specificity")[0],
+      // Variable Mod Composition
+      "mod_1_composition": document.getElementsByName("mod_1_composition")[0],
+      "mod_2_composition": document.getElementsByName("mod_2_composition")[0],
+      "mod_3_composition": document.getElementsByName("mod_3_composition")[0],
+      "mod_4_composition": document.getElementsByName("mod_4_composition")[0],
+      "mod_5_composition": document.getElementsByName("mod_5_composition")[0],
+      "mod_6_composition": document.getElementsByName("mod_6_composition")[0],
+      // Variable Mod Exact Mass
+      "mod_1_accurate_mass": document.getElementsByName(
+        "mod_1_accurate_mass")[0],
+      "mod_2_accurate_mass": document.getElementsByName(
+        "mod_2_accurate_mass")[0],
+      "mod_3_accurate_mass": document.getElementsByName(
+        "mod_3_accurate_mass")[0],
+      "mod_4_accurate_mass": document.getElementsByName(
+        "mod_4_accurate_mass")[0],
+      "mod_5_accurate_mass": document.getElementsByName(
+        "mod_5_accurate_mass")[0],
+      "mod_6_accurate_mass": document.getElementsByName(
+        "mod_6_accurate_mass")[0],
+      "maxMods": document.getElementsByName("msms_max_modifications")[0],
+      "msms_max_peptide_permutations": document.getElementsByName(
+        "msms_max_peptide_permutations")[0]
+    },
+    "massMods": {
+      // grab our mass mod lists
+      "type": document.getElementsByName("mod_range_type")[0],
+      "start": document.getElementsByName("mod_start_nominal")[0],
+      "end": document.getElementsByName("mod_end_nominal")[0],
+      "defect": document.getElementsByName("mod_defect")[0],
+      "mod_comp_ion": document.getElementsByName("mod_comp_ion"),
+      "nTermType": document.getElementsByName("mod_n_term_type")[0],
+      "modNTerm": document.getElementsByName("mod_n_term")[0],
+      "cTermType": document.getElementsByName("mod_c_term_type")[0],
+      "modCTerm": document.getElementsByName("mod_c_term")[0],
+      "uncleaved": document.getElementsByName("mod_uncleaved")[0],
+      "neutralLoss": document.getElementsByName("mod_neutral_loss")[0]
+    },
+    "crosslinking": {
+       // grab our crosslinking mod attributes
+       "searchType": document.getElementsByName("link_search_type")[0],
+       "maxHits": document.getElementsByName("max_saved_tag_hits")[0]
+    },
+    "links": {
+      // grab our link param attributes
+      "link_aa": document.getElementsByName("link_aa")[0],
+      "bridge": document.getElementsByName("bridge_composition")[0]
+    },
+    "matrix": {
+      // grab our matrix modification attributes
+      "boxes": document.getElementsByName("msms_search_type")
+    },
+    "preSearch": {
+      // grab our presearch parameters
+      // Base element
+      "element": document.getElementById("ejb_2")[0],
+      "taxon": document.getElementsByName("species_names")[0],
+      "low_mw": document.getElementsByName("msms_prot_low_mass")[0],
+      "high_mw": document.getElementsByName("msms_prot_high_mass")[0],
+      "full_mw_range": document.getElementsByName("msms_full_mw_range")[0],
+      "low_pi": document.getElementsByName("low_pi")[0],
+      "high_pi": document.getElementsByName("high_pi")[0],
+      "full_pi_range": document.getElementsByName("full_pi_range")[0],
+      "from_file": document.getElementsByName("results_from_file")[0],
+      "prog": document.getElementsByName("input_program_name")[0],
+      "input_name": document.getElementsByName("input_filename")[0],
+      "remove": document.getElementsByName("species_remove")[0]
+    },
+    "other": {
+      // Grab lower left objects
+      "mass": document.getElementsByName("parent_mass_convert")[0],
+      "charge": document.getElementsByName("msms_precursor_charge_range")[0],
+      "par_tol": document.getElementsByName("msms_parent_mass_tolerance")[0],
+      "par_tol_units": document.getElementsByName(
+        "msms_parent_mass_tolerance_units")[0],
+      "frag_tol": document.getElementsByName("fragment_masses_tolerance")[0],
+      "frag_tol_units": document.getElementsByName(
+        "fragment_masses_tolerance_units")[0],
+      "error": document.getElementsByName(
+        "msms_parent_mass_systematic_error")[0]
+    }
   };
 
   // -------------
@@ -312,11 +307,11 @@ function BatchTag() {
      * should never be toggled.
     */
     // Define key values
-    var allValues = {
-      "_database": {
+    var data = {
+      "database": {
         "nTermLim": ""
       },
-      "_other": {
+      "other": {
         "mass": "monoisotopic",
         "par_tol_units": "ppm",
         "frag_tol_units": "Da",
@@ -324,7 +319,7 @@ function BatchTag() {
         "frag_tol": 0.6,
         "error": 0
       },
-      "_mods": {
+      "mods": {
         "mod_1_label": "",
         "mod_2_label": "",
         "mod_3_label": "",
@@ -351,7 +346,7 @@ function BatchTag() {
         "mod_6_accurate_mass": "",
         "msms_max_peptide_permutations": ""
       },
-      "_massMods": {
+      "massMods": {
         "type": "Da",
         "start": "-100",
         "end": "100",
@@ -365,11 +360,11 @@ function BatchTag() {
         "uncleaved": false,
         "neutralLoss": false
       },
-      "_crosslinking": {
+      "crosslinking": {
         "searchType": "No Link",
         "maxHits": "1000"
       },
-      "_preSearch": {
+      "preSearch": {
         "low_mw": 1000,
         "high_mw": 125000,
         "full_mw_range": true,
@@ -381,22 +376,22 @@ function BatchTag() {
         "input_name": "last_res",
         "remove": false
       },
-      "_links": {
+      "links": {
         "link_aa": "C->C",
         "bridge": ""
       },
-      "_matrix": {
+      "matrix": {
         "boxes": Array.apply(null, new Array(3)).map(
           Boolean.prototype.valueOf, false)
       }
     };
     // Automatically set values for all
-    for (var tableName in allValues) {
+    for (var tableName in data) {
       // grab table with attributes
-      var table = allValues[tableName];
+      var table = data[tableName];
       for (var propertyName in table) {
         // Set all property values
-        var attr = this[tableName][propertyName];
+        var attr = this._data[tableName][propertyName];
         var value = table[propertyName];
         this.setValue(attr, value);
       }
@@ -413,7 +408,7 @@ function BatchTag() {
       // Grab key
       var key = keys[i];
       // Grab attr/value pair
-      var attr = this._protease[key];
+      var attr = this._data.protease[key];
       var value = values[i];
       this.setValue(attr, value);
     }
@@ -425,7 +420,7 @@ function BatchTag() {
      * Use:
      * BatchTag.setMaxMods(4);
     */
-    this.setValue(this._mods.maxMods, count);
+    this.setValue(this._data.mods.maxMods, count);
   };
 
   this.setConstantMods = function(values, blank) {
@@ -459,10 +454,10 @@ function BatchTag() {
     */
     // pairs to select within the
     if (blank) {
-      this._blankSelectBox(this._mods[key]);
+      this._blankSelectBox(this._data.mods[key]);
     }
     // now need to set all the values
-    this._setSelectMultiple(this._mods[key], values);
+    this._setSelectMultiple(this._data.mods[key], values);
   };
 
   // -------------
