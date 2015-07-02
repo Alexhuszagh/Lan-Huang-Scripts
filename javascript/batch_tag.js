@@ -717,6 +717,9 @@ function InjectOptions(elementName) {
 //   INJECT
 // NEW ELEMENT
 // -------------
-
-var inject = new InjectOptions("parent_mass_convert");
-inject.init();
+/*
+ * Covered in the TamperMonkey script, which then will inject these
+ * into the DOM.
+*/
+// var inject = new InjectOptions("parent_mass_convert");
+// inject.init();
