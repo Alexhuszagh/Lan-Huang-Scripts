@@ -216,7 +216,6 @@ var backbone15NDssoTag = function(cls) {
    * Sets the search settings for DSSO (XLMS) with ubiquitous
    * backbone 15N labeling.
   */
-  // Var Mods – K K(THIOL) K(ALKENE) N N(DEAMID) M M(OX)
   "use strict";
   // Call standard DSSO settings
   dssoStandardTag(cls);

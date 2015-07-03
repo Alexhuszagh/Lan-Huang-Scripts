@@ -42,18 +42,148 @@ var defaultSettingsSearch = function() {
   location.reload();
 };
 
-var ms2StandardSearch = function(cls) {
+var noQuantitationSearch = function(cls) {
   /*
-   * Sets the default MS/MS search settings, assuming high score thresholds.
+   * Turns off all quantitative aspects in the Protein Prospector
+   * search settings
+  */
+  "use strict";
+  cls.blankQuantitation();
+};
+
+var quantitationSearch = function(cls, label) {
+  /*
+   * Sets the ideal quantitation settings from a given list of labels.
+  */
+  "use strict";
+  // Set the quantitation on
+  cls.setQuantitation();
+  // Turn on the label
+  cls.setValue(cls._data.raw.quantitation, label);
+  // Turn on HTML
+  cls.setReportSettings(["format"], ["HTML"]);
+};
+
+var ms2BaseSearch = function(cls) {
+  /*
+   * Sets the minimal MS/MS search settings.
   */
   "use strict";
   // Set the overall scores
   cls.setScores(["proteinScore", "peptideScore", "proteinEv", "peptideEv"],
                 ["22.0", "15.0", "0.01", "0.05"]);
   // Set it to keep only one peptide of replicates
-  cls.setReplicates("Best Peptide Only");
-  cls.setReportSettings("Tab delimited text");
+  cls.setReportSettings(["format", "report", "sort1", "sort2", "minBestDiscr",
+                         "replicates"],
+                        ["Tab delimited text", "Protein",
+                         "Expectation Value", "", "0.0", "Best Peptide Only"]);
+};
+
+var ms2StandardSearch = function(cls) {
+  /*
+   * Sets the default MS/MS search settings, assuming high score thresholds.
+  */
+  "use strict";
+  // Set general basis for MS/MS searches
+  ms2BaseSearch(cls);
+  // Set the used columns
   cls.blankColumns();
+  cls.setColumns(["mz", "charge", "error", "score", "eVal", "bestEv",
+                  "numInDb", "coverage", "bestDiscrScore", "dbPeptide",
+                  "time", "msmsInfo", "start", "number", "accession",
+                  "mw", "species", "name", "links"]);
+  // Set mods to all Mods 1 Column
+  cls.setValue(cls._data.columns.modReporting, "All Mods (1 Column)");
+  // Turn off any quantitation that may be selected
+  noQuantitationSearch(cls);
+};
+
+var ms213C6QuantitationSearch = function(cls) {
+  /*
+   * Turns on the commonly used quantitation searches for a given Protein
+   * Prospector output.
+  */
+  "use strict";
+  ms2BaseSearch(cls);
+  // Turn off any quantitation that may be selected
+  quantitationSearch(cls, "Label:13C 15N (K)");
+};
+
+var falseDiscoveryRate = function(cls) {
+  /*
+   * Sets the base settings for finding out the MS false discovery rate,
+   * or FDR.
+  */
+  "use strict";
+  // Set the overall scores
+  cls.setScores(["proteinScore", "peptideScore", "proteinEv", "peptideEv"],
+                ["10.0", "10.0", "10000.0", "1.0"]);
+  // Set it to keep only one peptide of replicates
+  cls.setReportSettings(["format", "report", "sort1", "sort2", "minBestDiscr",
+                         "replicates"],
+                        ["HTML", "False Positive Rate",
+                         "Expectation Value", "", "-10.0", "Keep Replicates"]);
+  // Set the used columns
+  cls.blankColumns();
+  cls.setColumns(["mz", "charge", "error", "score", "eVal", "bestEv",
+                  "numInDb", "coverage", "bestDiscrScore", "dbPeptide",
+                  "time", "msmsInfo", "start", "number", "accession",
+                  "mw", "species", "name", "links"]);
+  // Set mods to all Mods 1 Column
+  cls.setValue(cls._data.columns.modReporting, "All Mods (1 Column)");
+  // Turn off any quantitation that may be selected
+  noQuantitationSearch(cls);
+};
+
+var ms3BaseSearch = function(cls) {
+  /*
+   * Sets the minimal XLMS search settings, assuming high score thresholds.
+  */
+  "use strict";
+  // Set the overall scores
+  cls.setScores(["proteinScore", "peptideScore", "proteinEv", "peptideEv"],
+                ["1.0", "1.0", "1.0", "1.0"]);
+  // Set it to keep only one peptide of replicates
+  cls.setReportSettings(["format", "report", "sort1", "sort2", "minBestDiscr",
+                         "replicates"],
+                        ["Tab delimited text", "Peptide",
+                         "Expectation Value", "", "0.0", "Keep Replicates"]);
+};
+
+var ms3StandardSearch = function(cls) {
+  /*
+   * Sets the default XLMS search settings, assuming high score thresholds.
+  */
+  "use strict";
+  // Set general basis for XLMS searches
+  ms3BaseSearch(cls);
+  // Set the used columns
+  cls.blankColumns();
+  cls.setColumns(["mz", "charge", "error", "score", "eVal", "dbPeptide",
+                  "time", "msmsInfo", "start", "accession", "name"]);
+  // Set mods to all Mods 1 Column
+  cls.setValue(cls._data.columns.modReporting, "All Mods (1 Column)");
+  // Turn off any quantitation that may be selected
+  noQuantitationSearch(cls);
+};
+
+var minimalXlms = function(cls) {
+  /*
+   * Sets the minimal XLMS search settings for XL Discoverer.
+  */
+  "use strict";
+  // Set general basis for XLMS searches
+  ms3BaseSearch(cls);
+  // Set the used columns
+  cls.blankColumns();
+  cls.setColumns(["mz", "charge", "error", "score", "eVal", "bestEv",
+                  "numInDb", "coverage", "bestDiscrScore", "dbPeptide",
+                  "time", "msmsInfo", "start", "number", "accession",
+                  "mw", "species", "name", "links"]);
+  // Set mods to all Mods 1 Column
+  cls.setValue(cls._data.columns.modReporting, "All Mods (1 Column)");
+  // Turn off any quantitation that may be selected
+  noQuantitationSearch(cls);
 };
 
 // -------------
@@ -78,12 +208,12 @@ function SearchCompare() {
   this._data = {
     "report": {
       "format": document.getElementsByName("save_format")[0],
-      "accessionNumbers": document.getElementsByName("")[0],
-      "preferredSpecies": document.getElementsByName("")[0],
-      "replicates": document.getElementsByName("")[0],
-      "remove": document.getElementsByName("")[0],
-      "multiSample": document.getElementsByName("")[0],
-      "spotFraction": document.getElementsByName("")[0],
+      "accessionNumbers": document.getElementsByName("accession_nums")[0],
+      "preferredSpecies": document.getElementsByName("preferred_species")[0],
+      "replicates": document.getElementsByName("peptide_filter")[0],
+      "remove": document.getElementsByName("remove")[0],
+      "multiSample": document.getElementsByName("multi_sample")[0],
+      "spotFraction": document.getElementsByName("id_filter_list")[0],
       "bestDiscr": document.getElementsByName("")[0],
       "discrGraph": document.getElementsByName("")[0],
       "report": document.getElementsByName("report_type")[0],
@@ -209,6 +339,19 @@ function SearchCompare() {
     */
     // Define key values
     var data = {
+      "report": {
+        "spotFraction": "",
+        "multiSample": false,
+        "remove": false,
+        "reportHomologous": "Interesting",
+        "unmatchedSpectra": false,
+        "saveSettings": false,
+        "maxPkFilter": "Max MSMS Pks",
+        "msmsMaxPeaks": "",
+        "maxReportHits": "",
+        "bestDiscr": true,
+        "discrGraph": true
+      }
     };
     // Automatically set values for all
     for (var tableName in data) {
@@ -232,13 +375,17 @@ function SearchCompare() {
     this._setIterables(keys, values, this._data.score);
   };
 
-  this.setReplicates = function(value) {
+  this.setColumns = function(keys) {
     /*
      * This function sets the replicates for the Search Compare report.
      * Use:
-     * SearchCompare.setReplicates("Keep Replicates");
+     * SearchCompare.setColumns(["Keep Replicates"]);
     */
-    this.setValue(this._data.report.replicates, value);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var attr = this._data.columns[key];
+      this.setValue(attr, true);
+    }
   };
 
   this.setReportSettings = function(keys, values) {
@@ -250,6 +397,20 @@ function SearchCompare() {
     this._setIterables(keys, values, this._data.report);
   };
 
+  this.setQuantitation = function() {
+    /*
+     * Turns on the quantitation settings for the given Search
+     * Compare report.
+    */
+    var keys = ["rawType", "mean", "meanVal", "stdDev", "intensity", "lhInt",
+                "intThreshold", "csThreshold", "snrThreshold",
+                "rtIntMin", "rtIntMax", "resolutionVal", "13CPerct",
+                "15NPerct", "18OPerct", "ionWindow"];
+    var values = ["Quantitation", true, "2.0", true, true, true, 0, 0, "10.0",
+                  "-10.0", "30.0", "70000.0", 98, 98, 100, "0.4"];
+    this._setIterables(keys, values, this._data.raw);
+  };
+
   // -------------
   //  BLANK UTILS
   // -------------
@@ -258,9 +419,33 @@ function SearchCompare() {
     /*
      * Blanks all entries within the this._data.columns for the checkBoxes
     */
-    for (var propertyName in this._data.columns) {
+    this._blankCheckBoxes(this._data.columns);
+  };
+
+  this.blankQuantitation = function() {
+    /*
+     * Undoes all the quantitation settings for the given Search
+     * Compare report.
+    */
+    // Blank all checkboxes
+    this._blankCheckBoxes(this._data.raw);
+    // Turn all the other values back using iterables
+    var keys = ["rawType", "quantitation", "meanVal", "intThreshold",
+                "csThreshold", "snrThreshold", "rtIntMin", "rtIntMax",
+                "resolutionVal", "13CPerct", "15NPerct", "18OPerct",
+                "ionWindow"];
+    var values = ["MS Precursor", "DTT_C 2H (C)", "2.0", 0, 0, "10.0", "-10.0",
+                  "30.0", "70000.0", 98, 98, 100, "0.4"];
+    this._setIterables(keys, values, this._data.raw);
+  };
+
+  this._blankCheckBoxes = function(holder) {
+    /*
+     * Blanks all checkBoxes within a data holder.
+    */
+    for (var propertyName in holder) {
       // Grab the DOM element and blank if checkbox
-      var ele = this._data.columns[propertyName];
+      var ele = holder[propertyName];
       if (ele.type === "checkbox") {
         ele.checked = false;
       }
@@ -391,6 +576,22 @@ if (innerText.substring(0, 14) === "Search Compare") {
     "MS/MS -- Standard": function() {
       "use strict";
       ms2StandardSearch(searchCompare);
+    },
+    "MS/MS -- 13C(6) 15N(2) Quantitation": function() {
+      "use strict";
+      ms213C6QuantitationSearch(searchCompare);
+    },
+    "XLMS -- Standard": function() {
+      "use strict";
+      ms3StandardSearch(searchCompare);
+    },
+    "False Discovery Rate": function() {
+      "use strict";
+      falseDiscoveryRate(searchCompare);
+    },
+    "XLMS -- Minimal Export": function() {
+      "use strict";
+      minimalXlms(searchCompare);
     }
   };
 }
