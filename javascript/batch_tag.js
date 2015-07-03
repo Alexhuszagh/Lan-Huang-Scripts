@@ -288,7 +288,7 @@ function BatchTag() {
       "mass": document.getElementsByName("parent_mass_convert")[0],
       "charge": document.getElementsByName("msms_precursor_charge_range")[0],
       "parTol": document.getElementsByName("msms_parent_mass_tolerance")[0],
-      "parTol_units": document.getElementsByName(
+      "parTolUnits": document.getElementsByName(
         "msms_parent_mass_tolerance_units")[0],
       "fragTol": document.getElementsByName("fragment_masses_tolerance")[0],
       "fragTolUnits": document.getElementsByName(
