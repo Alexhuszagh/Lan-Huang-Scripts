@@ -49,19 +49,27 @@
 // Grab the header for the form
 var innerText = document.getElementsByClassName("form_name")[0].innerText;
 
-// Grab functions
-if (typeof batchTagFunctions === "undefined") {
-  batchTagFunctions = unsafeWindow.batchTagFunctions;
-  searchCompareFunctions = unsafeWindow.searchCompareFunctions;
+// Grab classes(es)
+if (typeof InjectOptions === "undefined") {
+  // Grab functions locally in case not properly referenced
+  InjectOptions = unsafeWindow.InjectOptions;
 }
 
 // Check to see current document loaded
 if (innerText.substring(0, 9) === "Batch-Tag") {
+  if (typeof batchTagFunctions === "undefined") {
+    // Grab functions locally in case not properly referenced
+    batchTagFunctions = unsafeWindow.batchTagFunctions;
+  }
   var inject = new InjectOptions("parent_mass_convert",
-                                 batchTagFunctions);
+                                 batchTagFunctions, "br");
   inject.init();
 }
 else if (innerText.substring(0, 14) === "Search Compare") {
-  var inject = new InjectOptions(null, searchCompareFunctions);
+  if (typeof searchCompareFunctions === "undefined") {
+    // Grab functions locally in case not properly referenced
+    searchCompareFunctions = unsafeWindow.searchCompareFunctions;
+  }
+  var inject = new InjectOptions("save_params", searchCompareFunctions, "div");
   inject.init();
 }

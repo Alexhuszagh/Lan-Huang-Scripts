@@ -574,7 +574,6 @@ var init = function() {  //eslint-disable-line no-unused-vars
   */
   /*global batchTag:true*/
   "use strict";
-  console.log("HERE");
   batchTag = new BatchTag();
   batchTag.constants();
 
@@ -612,4 +611,3 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
   // Load tasks
   init();
 }
-console.log("LOADED");

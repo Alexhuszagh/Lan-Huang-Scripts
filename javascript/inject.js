@@ -28,7 +28,7 @@
 /*eslint no-underscore-dangle:0, curly: 2*/
 /*global location document:true*/
 
-function InjectOptions(elementName, functions) {   //eslint-disable-line no-unused-vars
+function InjectOptions(elementName, functions, spacer) {   //eslint-disable-line no-unused-vars
   "use strict";
   /*
    * Adds a DOM select-one element to the Batch Tag Search page,
@@ -128,7 +128,7 @@ function InjectOptions(elementName, functions) {   //eslint-disable-line no-unus
     var parent = ele.offsetParent;
     // Add new separator and add element
     for (var i = 0; i < 5; i++) {
-      parent.appendChild(document.createElement("br"));
+      parent.appendChild(document.createElement(spacer));
     }
     // Now need to add the options and add to widget
     this._addOptions(functions, newSelect);
