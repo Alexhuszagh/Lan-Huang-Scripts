@@ -55,7 +55,7 @@ if (typeof batchTagFunctions === "undefined") {
   searchCompareFunctions = unsafeWindow.searchCompareFunctions;
 }
 
-// Check to see
+// Check to see current document loaded
 if (innerText.substring(0, 9) === "Batch-Tag") {
   var inject = new InjectOptions("parent_mass_convert",
                                  batchTagFunctions);
