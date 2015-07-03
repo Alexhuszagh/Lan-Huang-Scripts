@@ -612,3 +612,4 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
   // Load tasks
   init();
 }
+console.log("LOADED");
