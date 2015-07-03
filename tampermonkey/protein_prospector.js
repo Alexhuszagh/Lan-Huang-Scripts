@@ -30,6 +30,8 @@
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/batch_tag.js
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/search_compare.js
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/inject.js
+// @downloadURL     https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/tampermonkey/protein_prospector.js
+// @updateURL       https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/tampermonkey/protein_prospector.js
 // @grant           unsafeWindow
 // @run-at          document-idle
 // ==/UserScript==

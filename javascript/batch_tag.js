@@ -78,6 +78,66 @@ var SILAC_13C6K_DSSO = [
   "Label:13C(6)15N(2)+XL:A-Thiol (Uncleaved K)"
 ];
 
+var BACKBONE_15N_CONST = [
+  "Label:15N(1) (A)",
+  "Label:15N(1) (D)",
+  "Label:15N(1) (E)",
+  "Label:15N(1) (F)",
+  "Label:15N(1) (G)",
+  "Label:15N(1) (I)",
+  "Label:15N(1) (L)",
+  "Label:15N(1) (P)",
+  "Label:15N(1) (S)",
+  "Label:15N(1) (T)",
+  "Label:15N(1) (V)",
+  "Label:15N(1) (Y)",
+  "Label:15N(2) (Q)",
+  "Label:15N(2) (W)",
+  "Label:15N(4) (R)",
+  "Label:15N(1)+Carbamidomethyl (C)",
+  "Label:15N(2) (K)"
+];
+
+var BACKBONE_15N_VAR = [
+  "Label:15N(1) (M)",
+  "Label:15N(1)+Deamidated (N)",
+  "Label:15N(1)+Oxidation (M)",
+  "Label:15N(2) (N)"
+];
+
+var BACKBONE_15N_DSSO_CONST = [
+  "Label:15N(1) (A)",
+  "Label:15N(1) (D)",
+  "Label:15N(1) (E)",
+  "Label:15N(1) (F)",
+  "Label:15N(1) (G)",
+  "Label:15N(1) (I)",
+  "Label:15N(1) (L)",
+  "Label:15N(1) (P)",
+  "Label:15N(1) (S)",
+  "Label:15N(1) (T)",
+  "Label:15N(1) (V)",
+  "Label:15N(1) (Y)",
+  "Label:15N(2) (Q)",
+  "Label:15N(2) (W)",
+  "Label:15N(4) (R)",
+  "Label:15N(1)+Carbamidomethyl (C)"
+];
+
+var BACKBONE_15N_DSSO_VAR = [
+  "Label:15N(2) (K)",
+  "Label:15N(2)+XL:A-Alkene (Protein N-term)",
+  "Label:15N(2)+XL:A-Alkene (Uncleaved K)",
+  "Label:15N(2)+XL:A-Sulfenic (Protein N-term )",
+  "Label:15N(2)+XL:A-Sulfenic (Uncleaved K)",
+  "Label:15N(2)+XL:A-Thiol (Protein N-term)",
+  "Label:15N(2)+XL:A-Thiol (Uncleaved K)",
+  "Label:15N(1) (M)",
+  "Label:15N(1)+Deamidated (N)",
+  "Label:15N(1)+Oxidation (M)",
+  "Label:15N(2) (N)"
+];
+
 // -------------
 //   FUNCTIONS
 // -------------
@@ -139,16 +199,30 @@ var silacDssoTag = function(cls) {
   cls.setVariableMods(mods);
 };
 
+var backbone15NTag = function(cls) {
+  /*
+   * Sets the search settings for MS/MS with ubiquitous
+   * backbone 15N labeling.
+  */
+  "use strict";
+  // Call standard MS/MS settings
+  ms2StandardTag(cls);
+  cls.setConstantMods(BACKBONE_15N_CONST);
+  cls.setVariableMods(BACKBONE_15N_VAR);
+};
+
 var backbone15NDssoTag = function(cls) {
   /*
    * Sets the search settings for DSSO (XLMS) with ubiquitous
    * backbone 15N labeling.
   */
-  // Constant Mods – 15N – A D E F G I L P S T V Y Q W R C(CARB)
   // Var Mods – K K(THIOL) K(ALKENE) N N(DEAMID) M M(OX)
   "use strict";
   // Call standard DSSO settings
   dssoStandardTag(cls);
+  // Change the mod settings as necessary
+  cls.setConstantMods(BACKBONE_15N_DSSO_CONST);
+  cls.setVariableMods(BACKBONE_15N_DSSO_VAR);
 };
 
 var trypsinTag = function(cls) {
@@ -592,6 +666,10 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
     "MS/MS -- SILAC 13C(6) 15N(2) K": function() {
       "use strict";
       ms2SilacTag(batchTag);
+    },
+    "MS/MS -- 15N Backbone Labeling": function() {
+      "use strict";
+      backbone15NTag(batchTag);
     },
     "XLMS -- DSSO Standard": function() {
       "use strict";
