@@ -14,14 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
- * In order to use this script, you need to change the current branch commit
- * to the one from the GitHub repository. To get your user token, go to the
- * Lan Huang Scripts repoistory, click "raw" and copy everything after
- * "?". Just copy that into these scripts and replace <RESTOFURL>
- * with your the value.
-*/
-
 // ==UserScript==
 // @id              Protein Prospector Scripts
 // @name            Protein Prospector Scripts
@@ -35,9 +27,9 @@
 // @match           http://lanhuang.ucsf.edu:18181/prospector/cgi-bin/msform.cgi*
 // @match           http://prospector2.ucsf.edu/prospector/cgi-bin/msform.cgi*
 // @Copyright       2015+, Alex Huszagh
-// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/batch_tag.js?<RESTOFURL>
-// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/search_compare.js?<RESTOFURL>
-// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/inject.js?<RESTOFURL>
+// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/batch_tag.js
+// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/search_compare.js
+// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/inject.js
 // @grant           unsafeWindow
 // @run-at          document-idle
 // ==/UserScript==
