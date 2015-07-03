@@ -577,7 +577,7 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
   */
   /*global batchTag:true*/
   batchTag = new BatchTag();
-  //batchTag.constants();
+  batchTag.constants();
 
   // -------------
   //   CREATE
