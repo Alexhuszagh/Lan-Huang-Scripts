@@ -70,6 +70,7 @@ else if (innerText.substring(0, 14) === "Search Compare") {
     // Grab functions locally in case not properly referenced
     searchCompareFunctions = unsafeWindow.searchCompareFunctions;
   }
-  var inject = new InjectOptions("save_params", searchCompareFunctions, "div");
+  var inject = new InjectOptions("save_params", searchCompareFunctions,
+                                 "nbsp");
   inject.init();
 }

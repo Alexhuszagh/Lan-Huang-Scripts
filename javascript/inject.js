@@ -48,7 +48,7 @@ function InjectOptions(elementName, functions, spacer) {   //eslint-disable-line
     */
     var presetOptions = document.createElement(newElement);
     presetOptions.appendChild(document.createTextNode(textNodeName));
-    presetOptions.appendChild(document.createElement("br"));
+    presetOptions.appendChild(document.createElement(spacer));
 
     return presetOptions;
   };
