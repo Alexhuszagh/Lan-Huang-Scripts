@@ -223,17 +223,17 @@ function BatchTag() {
       "mod5Composition": document.getElementsByName("mod_5_composition")[0],
       "mod6Composition": document.getElementsByName("mod_6_composition")[0],
       // Variable Mod Exact Mass
-      "mod1Accurate_mass": document.getElementsByName(
+      "mod1AccurateMass": document.getElementsByName(
         "mod_1_accurate_mass")[0],
-      "mod2Accurate_mass": document.getElementsByName(
+      "mod2AccurateMass": document.getElementsByName(
         "mod_2_accurate_mass")[0],
-      "mod3Accurate_mass": document.getElementsByName(
+      "mod3AccurateMass": document.getElementsByName(
         "mod_3_accurate_mass")[0],
-      "mod4Accurate_mass": document.getElementsByName(
+      "mod4AccurateMass": document.getElementsByName(
         "mod_4_accurate_mass")[0],
-      "mod5Accurate_mass": document.getElementsByName(
+      "mod5AccurateMass": document.getElementsByName(
         "mod_5_accurate_mass")[0],
-      "mod6Accurate_mass": document.getElementsByName(
+      "mod6AccurateMass": document.getElementsByName(
         "mod_6_accurate_mass")[0],
       "maxMods": document.getElementsByName("msms_max_modifications")[0],
       "msmsMaxPeptidePermutations": document.getElementsByName(
@@ -340,12 +340,12 @@ function BatchTag() {
         "mod4Composition": "",
         "mod5Composition": "",
         "mod6Composition": "",
-        "mod1Accurate_mass": "",
-        "mod2Accurate_mass": "",
-        "mod3Accurate_mass": "",
-        "mod4Accurate_mass": "",
-        "mod5Accurate_mass": "",
-        "mod6Accurate_mass": "",
+        "mod1AccurateMass": "",
+        "mod2AccurateMass": "",
+        "mod3AccurateMass": "",
+        "mod4AccurateMass": "",
+        "mod5AccurateMass": "",
+        "mod6AccurateMass": "",
         "msmsMaxPeptidePermutations": ""
       },
       "massMods": {
@@ -393,6 +393,7 @@ function BatchTag() {
       var table = data[tableName];
       for (var propertyName in table) {
         // Set all property values
+        console.log(propertyName);
         var attr = this._data[tableName][propertyName];
         var value = table[propertyName];
         this.setValue(attr, value);
