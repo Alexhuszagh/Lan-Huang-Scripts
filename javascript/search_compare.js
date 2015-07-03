@@ -379,7 +379,7 @@ function SearchCompare() {
      * Use:
      * SearchCompare.setColumns(["Keep Replicates"]);
     */
-    for (var i = 0; i < keys.length; i++) {
+    for (var i = 0, len = keys.length; i < len; i++) {
       var key = keys[i];
       var attr = this._data.columns[key];
       this.setValue(attr, true);
@@ -442,7 +442,6 @@ function SearchCompare() {
      * Blanks all checkBoxes within a data holder.
     */
     for (var propertyName in holder) {
-      console.log(propertyName);
       // Grab the DOM element and blank if checkbox
       var ele = holder[propertyName];
       if (ele.type === "checkbox") {
@@ -460,7 +459,7 @@ function SearchCompare() {
      * This sets all values from a set of key/value iterables using the
      * holder to get the DOM elements from this.
     */
-    for (var i = 0; i < keys.length; i++) {
+    for (var i = 0, len = keys.length; i < len; i++) {
       // Grab key
       var key = keys[i];
       // Grab attr/value pair
@@ -494,7 +493,7 @@ function SearchCompare() {
     else if (typeof attr.length === "number"
              && typeof attr.item === "function")
     {
-      for (var i = 0; i < attr.length; i++) {
+      for (var i = 0, len = attr.length; i < len; i++) {
         var tmpAttr = attr[i];
         var tmpValue = value[i];
         this.setValue(tmpAttr, tmpValue);
@@ -510,7 +509,7 @@ function SearchCompare() {
      * should be passed, since each new selection overrides an old.
     */
     // Iterate over entries in box
-    for (var i = 0; i < attr.length; i++) {
+    for (var i = 0, len = attr.length; i < len; i++) {
       // Check if default value is desired value
       if (attr[i].value == value) {   // eslint-disable-line eqeqeq
         attr[i].selected = true;
@@ -524,7 +523,7 @@ function SearchCompare() {
      * in a given DOM select element.
     */
     // Iterate over values and call this._setSelectBox()
-    for (var i = 0; i < values.length; i++) {
+    for (var i = 0, len = values.length; i < len; i++) {
       // All the options are listed 0->6, need to check for numeric operties
       var value = values[i];
       this._setSelectBox(attr, value);

@@ -479,7 +479,7 @@ function BatchTag() {
      * Use:
      * BatchTag.setProtease(["missed"], [5]);
     */
-    for (var i = 0; i < keys.length; i++) {
+    for (var i = 0, len = keys.length; i < len; i++) {
       // Grab key
       var key = keys[i];
       // Grab attr/value pair
@@ -547,7 +547,7 @@ function BatchTag() {
      * Blanks from a given DOM element attr.
     */
     // blanks
-    for (var i = 0; i < attr.length; i++) {
+    for (var i = 0, len = attr.length; i < len; i++) {
       attr[i].selected = false;
     }
   };
@@ -580,7 +580,7 @@ function BatchTag() {
     else if (typeof attr.length === "number"
              && typeof attr.item === "function")
     {
-      for (var i = 0; i < attr.length; i++) {
+      for (var i = 0, len = attr.length; i < len; i++) {
         var tmpAttr = attr[i];
         var tmpValue = value[i];
         this.setValue(tmpAttr, tmpValue);
@@ -596,7 +596,7 @@ function BatchTag() {
      * should be passed, since each new selection overrides an old.
     */
     // Iterate over entries in box
-    for (var i = 0; i < attr.length; i++) {
+    for (var i = 0, len = attr.length; i < len; i++) {
       // Check if default value is desired value
       if (attr[i].value == value) {   // eslint-disable-line eqeqeq
         attr[i].selected = true;
@@ -610,7 +610,7 @@ function BatchTag() {
      * in a given DOM select element.
     */
     // Iterate over values and call this._setSelectBox()
-    for (var i = 0; i < values.length; i++) {
+    for (var i = 0, len = values.length; i < len; i++) {
       // All the options are listed 0->6, need to check for numeric operties
       var value = values[i];
       this._setSelectBox(attr, value);

@@ -59,7 +59,7 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
                                  batchTagFunctions, "br");
   inject.init();
 }
-else if (innerText.substring(0, 14) === "Search Compare") {
+else if (innerText === "Search Compare") {
   if (typeof searchCompareFunctions === "undefined") {
     // Grab functions locally in case not properly referenced
     searchCompareFunctions = unsafeWindow.searchCompareFunctions;

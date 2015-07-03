@@ -103,7 +103,7 @@ function InjectOptions(elementName, functions, spacer) {   //eslint-disable-line
      * if the DOM element is ele.type === "select-one".
     */
     // Iterate over entries in box
-    for (var i = 0; i < ele.length; i++) {
+    for (var i = 0, len = ele.length; i < len; i++) {
       // Check if default value is desired value
       if (ele[i].selected === true) {
         return ele[i];
