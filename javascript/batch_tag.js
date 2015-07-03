@@ -574,6 +574,7 @@ var init = function() {  //eslint-disable-line no-unused-vars
   */
   /*global batchTag:true*/
   "use strict";
+  console.log("HERE");
   batchTag = new BatchTag();
   batchTag.constants();
 
