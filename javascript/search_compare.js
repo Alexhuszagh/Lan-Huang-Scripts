@@ -176,10 +176,8 @@ var minimalXlms = function(cls) {
   ms3BaseSearch(cls);
   // Set the used columns
   cls.blankColumns();
-  cls.setColumns(["mz", "charge", "error", "score", "eVal", "bestEv",
-                  "numInDb", "coverage", "bestDiscrScore", "dbPeptide",
-                  "time", "msmsInfo", "start", "number", "accession",
-                  "mw", "species", "name", "links"]);
+  cls.setColumns(["mz", "charge", "error", "score", "eVal", "dbPeptide",
+                  "time", "msmsInfo", "start", "accession", "name"]);
   // Set mods to all Mods 1 Column
   cls.setValue(cls._data.columns.modReporting, "All Mods (1 Column)");
   // Turn off any quantitation that may be selected
@@ -214,8 +212,8 @@ function SearchCompare() {
       "remove": document.getElementsByName("remove")[0],
       "multiSample": document.getElementsByName("multi_sample")[0],
       "spotFraction": document.getElementsByName("id_filter_list")[0],
-      "bestDiscr": document.getElementsByName("")[0],
-      "discrGraph": document.getElementsByName("")[0],
+      "bestDiscr": document.getElementsByName("best_disc_only")[0],
+      "discrGraph": document.getElementsByName("disc_score_graph")[0],
       "report": document.getElementsByName("report_type")[0],
       "sort1": document.getElementsByName("sort_type")[0],
       "sort2": document.getElementsByName("sort_type_2")[0],
@@ -297,7 +295,7 @@ function SearchCompare() {
       "bestEv": document.getElementsByName("report_best_expect")[0],
       "coverage": document.getElementsByName("report_coverage")[0],
       "bestDiscrScore": document.getElementsByName(
-        "reportBestDiscScore")[0],
+        "report_best_disc_score")[0],
       "dbPeptide": document.getElementsByName("report_db_peptide")[0],
       "modReporting": document.getElementsByName("peptide_mod_type")[0],
       "proteinMods": document.getElementsByName("report_protein_mod")[0],
@@ -444,6 +442,7 @@ function SearchCompare() {
      * Blanks all checkBoxes within a data holder.
     */
     for (var propertyName in holder) {
+      console.log(propertyName);
       // Grab the DOM element and blank if checkbox
       var ele = holder[propertyName];
       if (ele.type === "checkbox") {
