@@ -127,7 +127,7 @@ var dssoStandardTag = function(cls) {
   cls.setMaxMods(4);
 };
 
-var silacDsso = function(cls) {
+var silacDssoTag = function(cls) {
   /*
    * Sets the search settings for DSSO (XLMS) with 13C(6) 15N(2)-K
    * SILAC labeling.
@@ -599,7 +599,7 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
     },
     "XLMS -- DSSO SILAC 13C(6) 15N(2) K": function() {
       "use strict";
-      silacDsso(batchTag);
+      silacDssoTag(batchTag);
     },
     "XLMS -- 15N Backbone DSSO": function() {
       "use strict";
