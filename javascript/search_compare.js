@@ -371,12 +371,14 @@ function SearchCompare() {
 //     INIT
 // -------------
 
-var init = function() {  //eslint-disable-line no-unused-vars
+// Grab the header for the form
+var innerText = document.getElementsByClassName("form_name")[0].innerText;
+// Check to see current webpage loaded
+if (innerText.substring(0, 14) === "Search Compare") {
   /*
    * On initializing the SearchCompare features.
   */
   /*global searchCompare:true*/
-  "use strict";
   searchCompare = new SearchCompare();
   // searchCompare.constants();
 
@@ -387,15 +389,8 @@ var init = function() {  //eslint-disable-line no-unused-vars
   searchCompareFunctions = {  //eslint-disable-line no-unused-vars, no-undef
     "Default": defaultSettings,
     "MS/MS -- Standard": function() {
+      "use strict";
       ms2Standard(searchCompare);
     }
   };
-};
-
-// Grab the header for the form
-var innerText = document.getElementsByClassName("form_name")[0].innerText;
-// Check to see current webpage loaded
-if (innerText.substring(0, 14) === "Search Compare") {
-  // Load tasks
-  init();
 }

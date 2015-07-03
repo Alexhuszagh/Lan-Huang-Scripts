@@ -568,12 +568,14 @@ function BatchTag() {
 //     INIT
 // -------------
 
-var init = function() {  //eslint-disable-line no-unused-vars
+// Grab the header for the form
+var innerText = document.getElementsByClassName("form_name")[0].innerText;
+// Check to see current webpage loaded
+if (innerText.substring(0, 9) === "Batch-Tag") {
   /*
    * On initializing the Batch-Tag features.
   */
   /*global batchTag:true*/
-  "use strict";
   batchTag = new BatchTag();
   batchTag.constants();
 
@@ -584,30 +586,28 @@ var init = function() {  //eslint-disable-line no-unused-vars
   batchTagFunctions = {   //eslint-disable-line no-unused-vars, no-undef
     "Default": defaultSettings,
     "MS/MS -- Standard": function() {
+      "use strict";
       ms2Standard(batchTag);
     },
     "MS/MS -- SILAC 13C(6) 15N(2) K": function() {
+      "use strict";
       ms2Silac(batchTag);
     },
     "XLMS -- DSSO Standard": function() {
+      "use strict";
       dssoStandard(batchTag);
     },
     "XLMS -- DSSO SILAC 13C(6) 15N(2) K": function() {
+      "use strict";
       silacDsso(batchTag);
     },
     "XLMS -- 15N Backbone DSSO": function() {
+      "use strict";
       backbone15NDsso(batchTag);
     },
     "Protease -- Trypsin": function() {
+      "use strict";
       trypsin(batchTag);
     }
   };
-};
-
-// Grab the header for the form
-var innerText = document.getElementsByClassName("form_name")[0].innerText;
-// Check to see current webpage loaded
-if (innerText.substring(0, 9) === "Batch-Tag") {
-  // Load tasks
-  init();
 }
