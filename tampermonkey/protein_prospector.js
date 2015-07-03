@@ -36,21 +36,32 @@
 // @match           http://prospector2.ucsf.edu/prospector/cgi-bin/msform.cgi*
 // @Copyright       2015+, Alex Huszagh
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/batch_tag.js?token=<USERTOKEN>
+// @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/search_compare.js?token=<USERTOKEN>
 // @require         https://raw.githubusercontent.com/Alexhuszagh/Lan-Huang-Scripts/master/javascript/inject.js?token=<USERTOKEN>
 // @grant           unsafeWindow
 // @run-at          document-idle
 // ==/UserScript==
 
 // ESLint settings
-/*eslint no-undef:0 */
+/*eslint no-undef:0, no-redeclare:0 */
 /*global document:true*/
 
 // Grab the header for the form
 var innerText = document.getElementsByClassName("form_name")[0].innerText;
 
+// Grab functions
+if (typeof batchTagFunctions === "undefined") {
+  batchTagFunctions = unsafeWindow.batchTagFunctions;
+  searchCompareFunctions = unsafeWindow.searchCompareFunctions;
+}
+
 // Check to see
-if (innerText.substring() === "Batch-Tag") {
+if (innerText.substring(0, 9) === "Batch-Tag") {
   var inject = new InjectOptions("parent_mass_convert",
-                                 unsafeWindow.batchTagFunctions);
+                                 batchTagFunctions);
+  inject.init();
+}
+else if (innerText.substring(0, 14) === "Search Compare") {
+  var inject = new InjectOptions(null, searchCompareFunctions);
   inject.init();
 }

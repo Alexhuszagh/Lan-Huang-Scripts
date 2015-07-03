@@ -38,6 +38,10 @@ These scripts should be fully supported on any Python-supported operating system
 > **TamperMonkey/GreaseMonkey Addon**
 > All these scripts perform separate functions and come with a fully-configurable TamperMonkey add-on which integrates them for the full site. The TamperMonkey/GreaseMonkey script can be found [here](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/tampermonkey/protein_prospector.js).
 
-1. [Batch Tag](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/javascript/batch_tag.js)
-    * Injects an HTML Select Form Attribute into the Protein Prospector webpage, allowing users to toggle between common settings in order to rapidly select user configurations or output report formats.
-2. [Inject](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/javascript/inject.js)
+1. [Inject](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/javascript/inject.js)
+    * Injects an HTML Select Form Element into the Protein Prospector webpage, allowing users to toggle between common settings in order to rapidly select user configurations or output report formats.
+2. [Batch Tag](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/javascript/batch_tag.js)
+    * Configures default settings and grabs attributes from the Batch-Tag DOM and stores them locally.
+3. [Search Compare](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/javascript/search_compare.js)
+    * Configures default settings and grabs attributes from the Search-Compare DOM and stores them locally.
+

@@ -144,6 +144,8 @@ var backbone15NDsso = function(cls) {
    * Sets the search settings for DSSO (XLMS) with ubiquitous
    * backbone 15N labeling.
   */
+  // Constant Mods – 15N – A D E F G I L P S T V Y Q W R C(CARB)
+  // Var Mods – K K(THIOL) K(ALKENE) N N(DEAMID) M M(OX)
   "use strict";
   // Call standard DSSO settings
   dssoStandard(cls);
@@ -514,7 +516,6 @@ function BatchTag() {
     }
   };
 
-  // This toggles the selection for a given HTML "select-one" box
   this._setSelectBox = function(attr, value) {
     /*
      * Sets the selected elements in a given DOM select element..
@@ -530,7 +531,6 @@ function BatchTag() {
     }
   };
 
-  // This sets the selection for a given HTML "select-multiple" box
   this._setSelectMultiple = function(attr, values) {
     /*
      * Iterates over all values and then changes the value's selection
@@ -544,13 +544,17 @@ function BatchTag() {
     }
   };
 
-  // This sets the HTML text value for a given attribute
   this._setTextValue = function(attr, value) {
+    /*
+     * This sets the HTML text value for a given attribute
+    */
     attr.value = value;
   };
 
-  // This sets the HTML checkstate for a checkbox
   this._setCheckBox = function(attr, value) {
+    /*
+     * This sets the HTML checkstate for a checkbox
+    */
     if (value) {
       attr.checked = true;
     }
