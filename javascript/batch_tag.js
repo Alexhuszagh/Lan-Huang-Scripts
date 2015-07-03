@@ -82,7 +82,7 @@ var SILAC_13C6K_DSSO = [
 //   FUNCTIONS
 // -------------
 
-var defaultSettings = function() {
+var defaultSettingsTag = function() {
   /*
    * Reloads current webpage to reset settings upon loading
   */
@@ -90,7 +90,7 @@ var defaultSettings = function() {
   location.reload();
 };
 
-var ms2Standard = function(cls) {
+var ms2StandardTag = function(cls) {
   /*
    * Sets the default MS/MS search settings, assuming full Carbamidomethyl
    * incorporation.
@@ -104,17 +104,17 @@ var ms2Standard = function(cls) {
   cls.setMaxMods(2);
 };
 
-var ms2Silac = function(cls) {
+var ms2SilacTag = function(cls) {
   /*
    * Sets the MS/MS search settings with 13C(6) 15N(2)-K SILAC labeling.
   */
   "use strict";
   // Call standard MS/MS settings
-  ms2Standard(cls);
+  ms2StandardTag(cls);
   cls.setVariableMods(SILAC_13C6K, false);
 };
 
-var dssoStandard = function(cls) {
+var dssoStandardTag = function(cls) {
   /*
    * Sets the search settings for DSSO (XLMS).
   */
@@ -134,12 +134,12 @@ var silacDsso = function(cls) {
   */
   "use strict";
   // Call standard DSSO settings
-  dssoStandard(cls);
+  dssoStandardTag(cls);
   var mods = DEFAULT_MODS.concat(SILAC_13C6K).concat(SILAC_13C6K_DSSO);
   cls.setVariableMods(mods);
 };
 
-var backbone15NDsso = function(cls) {
+var backbone15NDssoTag = function(cls) {
   /*
    * Sets the search settings for DSSO (XLMS) with ubiquitous
    * backbone 15N labeling.
@@ -148,10 +148,10 @@ var backbone15NDsso = function(cls) {
   // Var Mods – K K(THIOL) K(ALKENE) N N(DEAMID) M M(OX)
   "use strict";
   // Call standard DSSO settings
-  dssoStandard(cls);
+  dssoStandardTag(cls);
 };
 
-var trypsin = function(cls) {
+var trypsinTag = function(cls) {
   /*
    * Sets the default configurations for Proteins digested with trypsin.
   */
@@ -584,18 +584,18 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
   // NEW ELEMENT
   // -------------
   batchTagFunctions = {   //eslint-disable-line no-unused-vars, no-undef
-    "Default": defaultSettings,
+    "Default": defaultSettingsTag,
     "MS/MS -- Standard": function() {
       "use strict";
-      ms2Standard(batchTag);
+      ms2StandardTag(batchTag);
     },
     "MS/MS -- SILAC 13C(6) 15N(2) K": function() {
       "use strict";
-      ms2Silac(batchTag);
+      ms2SilacTag(batchTag);
     },
     "XLMS -- DSSO Standard": function() {
       "use strict";
-      dssoStandard(batchTag);
+      dssoStandardTag(batchTag);
     },
     "XLMS -- DSSO SILAC 13C(6) 15N(2) K": function() {
       "use strict";
@@ -603,11 +603,11 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
     },
     "XLMS -- 15N Backbone DSSO": function() {
       "use strict";
-      backbone15NDsso(batchTag);
+      backbone15NDssoTag(batchTag);
     },
     "Protease -- Trypsin": function() {
       "use strict";
-      trypsin(batchTag);
+      trypsinTag(batchTag);
     }
   };
 }

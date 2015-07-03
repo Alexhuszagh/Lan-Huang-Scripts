@@ -34,7 +34,7 @@
 //   FUNCTIONS
 // -------------
 
-var defaultSettings = function() {
+var defaultSettingsSearch = function() {
   /*
    * Reloads current webpage to reset settings upon loading
   */
@@ -42,7 +42,7 @@ var defaultSettings = function() {
   location.reload();
 };
 
-var ms2Standard = function(cls) {
+var ms2StandardSearch = function(cls) {
   /*
    * Sets the default MS/MS search settings, assuming high score thresholds.
   */
@@ -387,10 +387,10 @@ if (innerText.substring(0, 14) === "Search Compare") {
   // NEW ELEMENT
   // -------------
   searchCompareFunctions = {  //eslint-disable-line no-unused-vars, no-undef
-    "Default": defaultSettings,
+    "Default": defaultSettingsSearch,
     "MS/MS -- Standard": function() {
       "use strict";
-      ms2Standard(searchCompare);
+      ms2StandardSearch(searchCompare);
     }
   };
 }
