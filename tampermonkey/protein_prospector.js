@@ -18,7 +18,7 @@
 // @id              Protein Prospector Scripts
 // @name            Protein Prospector Scripts
 // @namespace       https://github.com/Alexhuszagh/
-// @version         0.0.2
+// @version         0.0.3
 // @author          Alex Huszagh <ahuszagh@gmail.com>
 // @description     Protein Prospector scripts increase user efficiency by repeating repetitive clicks. Programmed in the spirit of DRY for data analysis.
 // @domain          http://lanhuang.ucsf.edu/
