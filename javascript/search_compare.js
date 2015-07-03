@@ -28,14 +28,36 @@
 
 // ESLint settings
 /*eslint no-underscore-dangle:0, curly: 2*/
-/*global document:true*/
+/*global document location:true*/
 
 // -------------
-//   CONSTANTS
+//   FUNCTIONS
 // -------------
 
+var defaultSettings = function() {
+  /*
+   * Reloads current webpage to reset settings upon loading
+  */
+  "use strict";
+  location.reload();
+};
+
+var ms2Standard = function(cls) {
+  /*
+   * Sets the default MS/MS search settings, assuming high score thresholds.
+  */
+  "use strict";
+  // Set the overall scores
+  cls.setScores(["proteinScore", "peptideScore", "proteinEv", "peptideEv"],
+                ["22.0", "15.0", "0.01", "0.05"]);
+  // Set it to keep only one peptide of replicates
+  cls.setReplicates("Best Peptide Only");
+  cls.setReportSettings("Tab delimited text");
+  cls.blankColumns();
+};
+
 // -------------
-//    OBJECTS
+//  DOM STORAGE
 // -------------
 
 // Create core Batch Tag class
@@ -55,45 +77,123 @@ function SearchCompare() {
   // grab our databases
   this._data = {
     "report": {
+      "format": document.getElementsByName("save_format")[0],
+      "accessionNumbers": document.getElementsByName("")[0],
+      "preferredSpecies": document.getElementsByName("")[0],
+      "replicates": document.getElementsByName("")[0],
+      "remove": document.getElementsByName("")[0],
+      "multiSample": document.getElementsByName("")[0],
+      "spotFraction": document.getElementsByName("")[0],
+      "bestDiscr": document.getElementsByName("")[0],
+      "discrGraph": document.getElementsByName("")[0],
+      "report": document.getElementsByName("report_type")[0],
+      "sort1": document.getElementsByName("sort_type")[0],
+      "sort2": document.getElementsByName("sort_type_2")[0],
+      "reportHomologous": document.getElementsByName(
+        "report_homologous_proteins")[0],
+      "unmatchedSpectra": document.getElementsByName("unmatched_spectra")[0],
+      "saveSettings": document.getElementsByName("save_params")[0],
+      "maxPkFilter": document.getElementsByName("msms_pk_filter")[0],
+      "msmsMaxPeaks": document.getElementsByName("msms_max_peaks")[0],
+      "maxReportHits": document.getElementsByName("msms_max_reported_hits")[0],
+      "minBestDiscr": document.getElementsByName(
+        "min_best_disc_score_ESI_ION_TRAP_low_res")[0]
     },
     "score": {
-      "protein_score": document.getElementsByName("min_protein_score")[0],
-      "peptide_score": document.getElementsByName("min_peptide_score")[0],
-      "protein_ev": document.getElementsByName("max_protein_evalue")[0],
-      "peptide_ev": document.getElementsByName("max_peptide_evalue")[0]
+      // Protein and peptide scores
+      "proteinScore": document.getElementsByName("min_protein_score")[0],
+      "peptideScore": document.getElementsByName("min_peptide_score")[0],
+      "proteinEv": document.getElementsByName("max_protein_evalue")[0],
+      "peptideEv": document.getElementsByName("max_peptide_evalue")[0]
     },
     "raw": {
-      "raw_type": document.getElementsByName("raw_type")[0],
+       // Raw user settings
+      "rawType": document.getElementsByName("raw_type")[0],
       "quantitation": document.getElementsByName("quan_type")[0],
       "median": document.getElementsByName("rep_q_median")[0],
       "iqr": document.getElementsByName("rep_q_iqr")[0],
       "mean": document.getElementsByName("rep_q_mean")[0],
-      "mean_val": document.getElementsByName("rep_q_n_sdv")[0],
-      "std_dev": document.getElementsByName("rep_q_stdev")[0],
+      "meanVal": document.getElementsByName("rep_q_n_sdv")[0],
+      "stdDev": document.getElementsByName("rep_q_stdev")[0],
       "num": document.getElementsByName("rep_q_num")[0],
       "intensity": document.getElementsByName("rep_intensity")[0],
-      "int_threshold": document.getElementsByName("intensity_threshold")[0],
+      "intThreshold": document.getElementsByName("intensity_threshold")[0],
       "resolution": document.getElementsByName("rep_resolution")[0],
-      "int_cs": document.getElementsByName("rep_cs_intensity")[0],
-      "lh_int": document.getElementsByName("rep_a_lh_int")[0],
+      "intCs": document.getElementsByName("rep_cs_intensity")[0],
+      "lhInt": document.getElementsByName("rep_a_lh_int")[0],
       "area": document.getElementsByName("rep_area")[0],
-      "cs_area": document.getElementsByName("rep_cs_area")[0],
-      "cs_threshold": document.getElementsByName("area_threshold")[0],
-      "lh_area": document.getElementsByName("rep_a_lh_area")[0],
+      "csArea": document.getElementsByName("rep_cs_area")[0],
+      "csThreshold": document.getElementsByName("area_threshold")[0],
+      "lhArea": document.getElementsByName("rep_a_lh_area")[0],
       "snr": document.getElementsByName("rep_snr")[0],
-      "snr_threshold": document.getElementsByName("snr_threshold")[0],
+      "snrThreshold": document.getElementsByName("snr_threshold")[0],
       "noise_mean": document.getElementsByName("rep_n_mean")[0],
-      "noise_sd": document.getElementsByName("rep_n_stdev")[0],
-      "rt_int_min": document.getElementsByName("rt_int_start")[0],
-      "rt_int_max": document.getElementsByName("rt_int_end")[0],
-      "resolution_val": document.getElementsByName("resolution")[0],
-      "13C_perct": document.getElementsByName("percent_C13")[0],
-      "15N_perct": document.getElementsByName("percent_N15")[0],
-      "18O_perct": document.getElementsByName("percent_O18")[0],
-      "purity_corr": document.getElementsByName("purity_correction")[0],
+      "noiseSd": document.getElementsByName("rep_n_stdev")[0],
+      "rtIntMin": document.getElementsByName("rt_int_start")[0],
+      "rtIntMax": document.getElementsByName("rt_int_end")[0],
+      "resolutionVal": document.getElementsByName("resolution")[0],
+      "13CPerct": document.getElementsByName("percent_C13")[0],
+      "15NPerct": document.getElementsByName("percent_N15")[0],
+      "18OPerct": document.getElementsByName("percent_O18")[0],
+      "purityCorr": document.getElementsByName("purity_correction")[0],
       "ionWindow": document.getElementsByName("reporter_ion_window")[0]
     },
     "columns": {
+      "m_h": document.getElementsByName("report_m_plus_h")[0],
+      "mz": document.getElementsByName("report_m_over_z")[0],
+      "charge": document.getElementsByName("report_charge")[0],
+      "mHCalc": document.getElementsByName("report_m_plus_h_calc")[0],
+      "mZCalc": document.getElementsByName("report_m_over_z_calc")[0],
+      "intensity": document.getElementsByName("report_intensity")[0],
+      "error": document.getElementsByName("report_error")[0],
+      "unmatched": document.getElementsByName("report_unmatched")[0],
+      "num_peaks": document.getElementsByName("report_num_pks")[0],
+      "rank": document.getElementsByName("report_rank")[0],
+      "searchNum": document.getElementsByName("report_search_number")[0],
+      "score": document.getElementsByName("report_score")[0],
+      "scoreDiff": document.getElementsByName("report_score_diff")[0],
+      "eVal": document.getElementsByName("report_expectation")[0],
+      "pVal": document.getElementsByName("report_p_value")[0],
+      "logP": document.getElementsByName("report_nlog_p_value")[0],
+      "precursorNum": document.getElementsByName("report_num_precursor")[0],
+      "gradient": document.getElementsByName("report_gradient")[0],
+      "offset": document.getElementsByName("report_offset")[0],
+      "discrScore": document.getElementsByName("report_disc_score")[0],
+      "numInDb": document.getElementsByName("report_repeats")[0],
+      "protScore": document.getElementsByName("report_prot_score")[0],
+      "numUnique": document.getElementsByName("report_num_unique")[0],
+      "peptideCount": document.getElementsByName("report_peptide_count")[0],
+      "bestPepScore": document.getElementsByName("report_best_score")[0],
+      "bestEv": document.getElementsByName("report_best_expect")[0],
+      "coverage": document.getElementsByName("report_coverage")[0],
+      "bestDiscrScore": document.getElementsByName(
+        "reportBestDiscScore")[0],
+      "dbPeptide": document.getElementsByName("report_db_peptide")[0],
+      "modReporting": document.getElementsByName("peptide_mod_type")[0],
+      "proteinMods": document.getElementsByName("report_protein_mod")[0],
+      "slipThres": document.getElementsByName("slip_threshold")[0],
+      "massMods": document.getElementsByName("report_mass_mod")[0],
+      "missedDleavages": document.getElementsByName(
+        "report_missed_cleavages")[0],
+      "time": document.getElementsByName("report_time")[0],
+      "msmsInfo": document.getElementsByName("report_msms_info")[0],
+      "length": document.getElementsByName("report_length")[0],
+      "composition": document.getElementsByName("report_composition")[0],
+      "start": document.getElementsByName("report_start_aa")[0],
+      "end": document.getElementsByName("report_end_aa")[0],
+      "prevAA": document.getElementsByName("report_previous_aa")[0],
+      "nextAA": document.getElementsByName("report_next_aa")[0],
+      "number": document.getElementsByName("report_number")[0],
+      "accession": document.getElementsByName("report_accession")[0],
+      "uniprot": document.getElementsByName("report_uniprot_id")[0],
+      "geneName": document.getElementsByName("report_gene_name")[0],
+      "protLength": document.getElementsByName("report_prot_len")[0],
+      "mw": document.getElementsByName("report_mw")[0],
+      "pi": document.getElementsByName("report_pi")[0],
+      "species": document.getElementsByName("report_species")[0],
+      "name": document.getElementsByName("report_name")[0],
+      "links": document.getElementsByName("report_links")[0],
+      "checkboxes": document.getElementsByName("report_checkboxes")[0]
     }
   };
 
@@ -101,10 +201,9 @@ function SearchCompare() {
   //     CORE
   // -------------
 
-  // sets the constant values for the site
   this.constants = function() {
     /*
-     * This function sets the default constants for the Batch Tag Search.
+     * This function sets the default constants for the Search Compare.
      * These values are typically those that never change, and therefore
      * should never be toggled.
     */
@@ -124,9 +223,68 @@ function SearchCompare() {
     }
   };
 
+  this.setScores = function(keys, values) {
+    /*
+     * This function sets the scores for the Search Compare report.
+     * Use:
+     * SearchCompare.setScores(["proteinScore"], ["22.0"]);
+    */
+    this._setIterables(keys, values, this._data.score);
+  };
+
+  this.setReplicates = function(value) {
+    /*
+     * This function sets the replicates for the Search Compare report.
+     * Use:
+     * SearchCompare.setReplicates("Keep Replicates");
+    */
+    this.setValue(this._data.report.replicates, value);
+  };
+
+  this.setReportSettings = function(keys, values) {
+    /*
+     * This function sets the report settings for the Search Compare report.
+     * Use:
+     * SearchCompare.setReportSettings(["format"], ["HTML"]);
+    */
+    this._setIterables(keys, values, this._data.report);
+  };
+
+  // -------------
+  //  BLANK UTILS
+  // -------------
+
+  this.blankColumns = function() {
+    /*
+     * Blanks all entries within the this._data.columns for the checkBoxes
+    */
+    for (var propertyName in this._data.columns) {
+      // Grab the DOM element and blank if checkbox
+      var ele = this._data.columns[propertyName];
+      if (ele.type === "checkbox") {
+        ele.checked = false;
+      }
+    }
+  };
+
   // -------------
   //     UTILS
   // -------------
+
+  this._setIterables = function(keys, values, holder) {
+    /*
+     * This sets all values from a set of key/value iterables using the
+     * holder to get the DOM elements from this.
+    */
+    for (var i = 0; i < keys.length; i++) {
+      // Grab key
+      var key = keys[i];
+      // Grab attr/value pair
+      var attr = holder[key];
+      var value = values[i];
+      this.setValue(attr, value);
+    }
+  };
 
   this.setValue = function(attr, value) {
     /*
@@ -210,11 +368,34 @@ function SearchCompare() {
 }
 
 // -------------
-//   FUNCTIONS
+//     INIT
 // -------------
 
-var searchCompareFunctions = {  //eslint-disable-line no-unused-vars, no-undef
+var init = function() {  //eslint-disable-line no-unused-vars
+  /*
+   * On initializing the SearchCompare features.
+  */
+  /*global searchCompare:true*/
+  "use strict";
+  searchCompare = new SearchCompare();
+  // searchCompare.constants();
+
+  // -------------
+  //   CREATE
+  // NEW ELEMENT
+  // -------------
+  searchCompareFunctions = {  //eslint-disable-line no-unused-vars, no-undef
+    "Default": defaultSettings,
+    "MS/MS -- Standard": function() {
+      ms2Standard(searchCompare);
+    }
+  };
 };
 
-var searchCompare = new SearchCompare();
-// searchCompare.constants();
+// Grab the header for the form
+var innerText = document.getElementsByClassName("form_name")[0].innerText;
+// Check to see current webpage loaded
+if (innerText.substring(0, 14) === "Search Compare") {
+  // Load tasks
+  init();
+}
