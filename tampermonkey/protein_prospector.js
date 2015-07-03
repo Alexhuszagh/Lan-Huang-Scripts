@@ -41,29 +41,21 @@
 /*global document:true*/
 
 // Grab the header for the form
-var innerText = document.getElementsByClassName("form_name")[0].innerText;
+var header = document.getElementsByClassName("form_name")[0];
+var text = header.innerText || header.textContent;
+// The textContext keeps the newline featsures on the top & bottom
+var trimmed = text.trim();
 
-// Grab classes(es)
-if (typeof InjectOptions === "undefined") {
-  // Grab functions locally in case not properly referenced
-  InjectOptions = unsafeWindow.InjectOptions;
-}
-
+var InjectOptions = InjectOptions || unsafeWindow.InjectOptions;
 // Check to see current document loaded
-if (innerText.substring(0, 9) === "Batch-Tag") {
-  if (typeof batchTagFunctions === "undefined") {
-    // Grab functions locally in case not properly referenced
-    batchTagFunctions = unsafeWindow.batchTagFunctions;
-  }
+if (trimmed.substring(0, 9) === "Batch-Tag") {
+  var batchTagFunctions = batchTagFunctions || unsafeWindow.batchTagFunctions;
   var inject = new InjectOptions("parent_mass_convert",
                                  batchTagFunctions, "br");
   inject.init();
 }
-else if (innerText === "Search Compare") {
-  if (typeof searchCompareFunctions === "undefined") {
-    // Grab functions locally in case not properly referenced
-    searchCompareFunctions = unsafeWindow.searchCompareFunctions;
-  }
+else if (trimmed === "Search Compare") {
+  var searchCompareFunctions = searchCompareFunctions || unsafeWindow.searchCompareFunctions;
   var inject = new InjectOptions("save_params", searchCompareFunctions,
                                  "nbsp");
   inject.init();

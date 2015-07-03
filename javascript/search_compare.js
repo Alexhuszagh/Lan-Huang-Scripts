@@ -555,9 +555,11 @@ function SearchCompare() {
 // -------------
 
 // Grab the header for the form
-var innerText = document.getElementsByClassName("form_name")[0].innerText;
+var header = document.getElementsByClassName("form_name")[0];
+var text = header.innerText || header.textContent;
+var trimmed = text.trim();
 // Check to see current webpage loaded
-if (innerText.substring(0, 14) === "Search Compare") {
+if (trimmed === "Search Compare") {
   /*
    * On initializing the SearchCompare features.
   */
