@@ -393,7 +393,6 @@ function BatchTag() {
       var table = data[tableName];
       for (var propertyName in table) {
         // Set all property values
-        console.log(propertyName);
         var attr = this._data[tableName][propertyName];
         var value = table[propertyName];
         this.setValue(attr, value);
@@ -578,7 +577,7 @@ if (innerText.substring(0, 9) === "Batch-Tag") {
   */
   /*global batchTag:true*/
   batchTag = new BatchTag();
-  batchTag.constants();
+  //batchTag.constants();
 
   // -------------
   //   CREATE
