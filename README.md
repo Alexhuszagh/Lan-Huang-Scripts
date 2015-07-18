@@ -31,6 +31,9 @@ These scripts should be fully supported on any Python-supported operating system
 1. [Check Coverage](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/check_coverage.py)
     * Checks the sequence coverage for a list of UniProt IDs given by the user in a list of files supplied for the user. These can have optional labels, if desired. It then outputs the sequence coverage of each peptide using '+'/' ', in a format similar to ClustalW.
 
+2. [PDB To Fasta](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/pdb_to_fasta.py)
+    * Converts a PDB file to a FASTA sequence, separated by chains for importation to the [Integrative Modeling Platform](https://github.com/salilab/imp).
+
 ### JavaScript
 
 #### Protein Prospector
