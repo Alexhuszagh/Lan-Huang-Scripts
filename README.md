@@ -9,6 +9,7 @@ These scripts should be fully supported on any Python-supported operating system
   - [Python](#python)
     - [File Fixing Scripts](#file-fixing-scripts)
     - [Automated Data Analysis](#automated-data-analysis)
+    - [Data Conversion](#data-conversion)
   - [JavaScript](#javascript)
     - [Protein Prospector](#protein-prospector)
 
@@ -33,6 +34,11 @@ These scripts should be fully supported on any Python-supported operating system
 
 2. [PDB To Fasta](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/pdb_to_fasta.py)
     * Converts a PDB file to a FASTA sequence, separated by chains for importation to the [Integrative Modeling Platform](https://github.com/salilab/imp).
+
+### Data Conversion
+
+1. [GMM To Imp](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/gmm_to_imp.py)
+    * Converts the GMM file format (PDB-like, which is an awful decision) to a simplified, more parseable format used in the IMP examples.
 
 ### JavaScript
 

@@ -73,7 +73,7 @@ from Bio.SeqUtils import seq1
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-f', "--file", type=str,
-                    help="Full (preferably) or local path to file")
+                    help="Full (preferably) or local path to PDB file")
 PARSER.add_argument('-c', "--code", type=str,
                     help="PDB code to enter")
 PARSER.add_argument('-l', "--line-length", type=int, default=80,
