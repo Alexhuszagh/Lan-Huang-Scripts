@@ -66,7 +66,7 @@ PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-f', "--file", type=str, required=True,
                     help="Full (preferably) or local path to GMM file")
 PARSER.add_argument('-o', "--output", type=str, default="out.gmm.txt",
-                    help="Characters per line")
+                    help="Output file")
 ARGS = PARSER.parse_args()
 
 # check arguments
@@ -180,8 +180,7 @@ class GmmParser(object):
 class MakeOutput(GmmParser):
     '''Makes the output from a given file path'''
 
-    def __init__(self, path):
-        fileobj = open(path)
+    def __init__(self, fileobj):
         super(MakeOutput, self).__init__(fileobj)
 
         self.buf = StringIO()
@@ -232,11 +231,13 @@ class MakeOutput(GmmParser):
 def main():
     '''On init'''
 
-    cls = MakeOutput(FILE)
-    cls.run()
-    cls.write_header()
-    cls.write_lines()
-    cls.buf.seek(0)         # if not, empty output
+    with open(FILE, 'r') as fileobj:
+        cls = MakeOutput(fileobj)
+        cls.run()
+        cls.write_header()
+        cls.write_lines()
+        cls.buf.seek(0)         # if not, empty output
+
     with open(ARGS.output, 'w') as dst:
         shutil.copyfileobj(cls.buf, dst)
 

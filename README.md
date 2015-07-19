@@ -40,6 +40,9 @@ These scripts should be fully supported on any Python-supported operating system
 1. [GMM To Imp](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/gmm_to_imp.py)
     * Converts the GMM file format (PDB-like, which is an awful decision) to a simplified, more parseable format used in the IMP examples.
 
+2. [XL To CSV](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/xl_to_csv.py)
+    * Converts an output from XL Discoverer, with the ambiguity intact, to take either the first option within each ambiguous position or to include all for spatial restraints. Outputs to a "prot1,res1,prot2,res2" CSV format used as spatial constraints in IMP.
+
 ### JavaScript
 
 #### Protein Prospector
