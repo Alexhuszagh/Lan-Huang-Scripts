@@ -122,7 +122,7 @@ class CrosslinkPositionParser(object):
         '''Processes a given line to the consistuent crosslinks'''
 
         if any([i in line for i in NTERM_MODS]):
-            line = self._remove_term(line, NTERM_MODS, 0)
+            line = self._remove_term(line, NTERM_MODS, '1')
         # TODO:
         if any([i in line for i in CTERM_MODS]):
             line = self._remove_term(line, CTERM_MODS, 'TBD')
@@ -146,7 +146,7 @@ class CrosslinkPositionParser(object):
         for term in term_mods:
             if term in line:
                 sub = ':{0}'.format(term)
-                line.replace(sub, replace)
+                line = line.replace(sub, replace)
         return line
 
     @staticmethod

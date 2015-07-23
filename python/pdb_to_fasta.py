@@ -159,6 +159,8 @@ class MakeSequence(ParsePDB):
         chain_list = sorted(self.chains)
         for chain in chain_list:
             self.write_chain(chain)
+            # need to write a blank line
+            print(file=self.buf)
 
     def write_chain(self, key):
         '''Writes the chain information to sequence'''
