@@ -46,7 +46,7 @@ These scripts should be fully supported on any Python-supported operating system
 
 ### Automated Images
 
-1. [Sequence Ions](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/seuqnece_ions.py)
+1. [Sequence Ions](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/sequence_ions.py)
     * Generates an ion sequencing image for y/b-ions, which can export to PNG, PDF, SVG, PS, and EPS. Requires PySide and Matplotlib.
 
 ### JavaScript
