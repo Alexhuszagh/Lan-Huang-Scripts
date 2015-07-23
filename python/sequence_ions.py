@@ -36,9 +36,6 @@ matplotlib.rcParams['mathtext.default'] = 'regular'
 # load functions.objects
 from PySide import QtCore, QtGui
 
-# REGEXES
-ION = re.compile('^(b|y|B|Y)([0-9]+)$')
-
 # CONSTANTS
 
 QLABEL_BANNER_STYLE = '''
@@ -50,6 +47,21 @@ QLabel {
 
 AMINO_ACIDS = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N',
                'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
+SUBSCRIPT_RATIO = 0.375
+
+# REGEXES
+ION = re.compile('^(b|y|B|Y)([0-9]+)$')
+AA_SET = '[{0}]'.format(''.join(AMINO_ACIDS))
+# need at least one preceeding AA, then any number of <AA>_{<AA>}
+# pairs, where each group can be <AA>, _|^<AA>, {<AA>}, _|^{<AA>}
+#RES = r'^(?:%(aa)s|%(aa)s[_^]%(aa)s|' \
+#      r'\{%(aa)s+\}|%(aa)s[_^]\{%(aa)s+\})' %{'aa': AA_SET}
+#PEPTIDE = re.compile(RES + '+$')
+
+RES = r'^(?:%(aa)s[_^]\{%(aa)s+\}|%(aa)s[_^]%(aa)s|' \
+      r'\{%(aa)s+\}|%(aa)s)' %{'aa': AA_SET}
+PEPTIDE = re.compile(RES + '+$')
 
 # ------------------
 #     ARGUMENTS
@@ -82,11 +94,18 @@ PARSER.add_argument('-o', "--output", type=str, help="Outfile path")
 PARSER.add_argument('-f', "--format", type=str, default="png",
                     choices=['png', 'svg', 'pdf', 'ps', 'eps'],
                     help="Output format for the image")
+PARSER.add_argument('-k', "--keep-lines", action="store_true",
+                    help="Keep lines for no sequencing ions")
 ARGS = PARSER.parse_args()
 
 if ARGS.peptide is None and ARGS.ions is not None:
     raise argparse.ArgumentTypeError("Please enter a valid peptide before "
                                      "specifying sequencing ions.")
+elif ARGS.peptide is not None:
+    if not PEPTIDE.match(ARGS.peptide.upper()):
+        raise argparse.ArgumentTypeError("Please enter a valid peptide "
+                                         "sequence. Supports TEX-like "
+                                         "subscript and superscripts.")
 elif ARGS.ions is not None:
     check_ions(ARGS.peptide, ARGS.ions)
 
@@ -137,9 +156,10 @@ class IonSelection(QtGui.QWidget):
             lst -- storage list for ion series
         '''
 
-        for idx in range(0, len(self.peptide) - 1, 5):
+        length = self.parent().get_length(self.peptide)
+        for idx in range(0, length - 1, 5):
             hlayout = QtGui.QHBoxLayout()
-            limit = min([idx+5, len(self.peptide) - 1])
+            limit = min([idx+5, length - 1])
             for i in range(idx, limit):
                 btn = QtGui.QPushButton('{0}{1}'.format(label, i+1), self)
                 btn.setCheckable(True)
@@ -191,6 +211,7 @@ class MainWindow(QtGui.QMainWindow):
         self.peptide = peptide
         self.ions = ions
         self.output = output
+        self.offsets = []
         # init main widget
         if peptide is None:
             self.child_widget = PeptideSelection(self)
@@ -211,11 +232,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # grab the peptide
         if self.peptide is None:
-            self.peptide = self.child_widget.peptide.text().upper()
+            self.peptide = self.child_widget.peptide.text()
             self.child_widget.hide()
             self.child_widget.deleteLater()
+        self._process_peptide()
         # verify integrity
-        if not all([i in AMINO_ACIDS for i in self.peptide]):
+        if not PEPTIDE.match(self.peptide):
             dialog = QtGui.QMessageBox(text="Please enter a valid peptide",
                                        windowTitle="Input Error", parent=self)
             sys.exit(dialog.exec_())
@@ -241,12 +263,14 @@ class MainWindow(QtGui.QMainWindow):
         # grab desktop settings
         app = QtGui.QApplication.instance()
         dpi = app.desktop().logicalDpiX()
-        length = len(self.peptide)
+        length = self.get_length()
+        offset = self.get_offset()
+        width = length + SUBSCRIPT_RATIO*offset
         # make figure for width/height and set axes
-        fig = plt.figure(figsize=(length, 2.0), dpi=dpi)
-        axes = self._init_axes(fig, length)
+        fig = plt.figure(figsize=(width, 2.0), dpi=dpi)
+        axes = self._init_axes(fig, length, offset)
         # add the data
-        self._plot_peptide(axes, length)
+        self._plot_peptide(axes)
         self._add_lines(axes, length)
         # now save the plot
         self.save_plot(fig, plt)
@@ -280,7 +304,7 @@ class MainWindow(QtGui.QMainWindow):
             y ions, then b ions
         '''
 
-        length = len(self.peptide)
+        length = self.get_length()
         # default off
         ions = [[False]*(length-1), [False]*(length-1)]
         for ion in self.ions:
@@ -312,23 +336,62 @@ class MainWindow(QtGui.QMainWindow):
         # assign the ions
         self.ions = ions
 
+    def _process_peptide(self):
+        '''
+        Processes the peptide so the TEX codes are simplified, ie,
+        removing unnecessary codes for a base expression.
+        :
+            SAMPL_{L}ER -> SAMPL_{L}ER
+            SAMPL{L}ER -> SAMPLER
+        '''
+
+        self.peptide = self.peptide.upper()
+        # need a negative look-behind assertion for formatting quues
+        # and then to capture solely the text within the {} notation.
+        # use the "\\1" formating notation to replace {(group)} with
+        # (group)
+        pattern = r'(?<![_^])\{(%s+)\}' %(AA_SET)
+        self.peptide = re.sub(pattern, r'\1', self.peptide)
+
+    def get_length(self, peptide=None):
+        '''
+        Processes the peptide length removing all of the subscripted
+        and superscripted characters.
+        '''
+
+        peptide = self.peptide if peptide is None else peptide
+        pattern = r'(?:[_^]\{(%(aa)s+)\}|[_^]%(aa)s)' %{'aa': AA_SET}
+        return len(re.sub(pattern, '', peptide))
+
+    def get_offset(self, peptide=None):
+        '''
+        Extracts all the subscripted and superscripted characters and
+        returns the number of characters.
+        '''
+
+        peptide = self.peptide if peptide is None else peptide
+        pattern = r'(?:[_^]\{(%(aa)s+)\}|[_^](%(aa)s))' %{'aa': AA_SET}
+        matches = re.findall(pattern, peptide)
+        matches = ''.join([''.join(i) for i in matches])
+        return len(matches)
+
     # ------------------
     #    PLOT UTILS
     # ------------------
 
     @staticmethod
-    def _init_axes(fig, length):
+    def _init_axes(fig, length, offset):
         '''Initializes the axes for the current plot'''
 
         axes = fig.add_subplot(111)
         axes.set_ylim(0, 200)
-        axes.set_xlim(0, 100*length)
+        axes.set_xlim(0, 100*(length+(SUBSCRIPT_RATIO*offset)))
         axes.get_xaxis().set_visible(False)
         axes.get_yaxis().set_visible(False)
 
         return axes
 
-    def _plot_peptide(self, axes, length):
+    def _plot_peptide(self, axes):
         '''
         Plots the peptide onto the axes, at fixed width with 25-50-25,
         where 25 is the leading space, 50 is the length of peptide
@@ -339,10 +402,23 @@ class MainWindow(QtGui.QMainWindow):
         font = FontProperties()
         font.set_family('monospace')
         # now need to plot ytext widgets
-        for index in range(length):
+        index = 0
+        peptide = self.peptide
+        # iteratively find the next sub
+        while peptide:
+            # match residue
+            match = re.match(RES, peptide)
+            res = match.group(0)
+            # create formatting string + set offsets
+            residue = r'$%s$' %res
+            offset = 100*SUBSCRIPT_RATIO*self.get_offset(res)
+            self.offsets.append(offset)
             # x, y, text
-            axes.text(100*index+25, 75, self.peptide[index], fontsize=50,
-                      fontproperties=font)
+            axes.text(100*index+25+sum(self.offsets[:-1]), 75, residue,
+                      fontsize=50, fontproperties=font)
+            # reset out peptide and adjust idx
+            peptide = peptide[match.end():]
+            index += 1
 
     def _add_lines(self, axes, length):
         '''
@@ -356,15 +432,23 @@ class MainWindow(QtGui.QMainWindow):
         font.set_family('monospace')
         # add the vertical lines
         for index in range(1, length):
-            axes.plot((index*100, index*100), (37.5, 162.5), self.color,
-                      linewidth=5)
+            offset = sum(self.offsets[:index])
+            # pylint: disable=bad-continuation
+            if (ARGS.keep_lines or
+                # b-ions have a line
+                self.ions[1][index-1] or
+                # y-ions have a line
+                self.ions[0][length-index-1]):
+                axes.plot((index*100+offset, index*100+offset),
+                          (37.5, 162.5), self.color, linewidth=5)
         # now have 20+30 room for the horizontal lines
         # bottom ion series
         b_ions = self.ions[1]
         for index, value in enumerate(b_ions):
             # add the horizontal line
             if value:
-                xstart = (index+1)*100
+                offset = sum(self.offsets[:index+1])
+                xstart = (index+1)*100 + offset
                 axes.plot((xstart-20, xstart), (37.5, 37.5), self.color,
                           linewidth=5)
                 # now add the label
@@ -377,7 +461,9 @@ class MainWindow(QtGui.QMainWindow):
         for index, value in enumerate(y_ions):
             # add the horizontal line
             if value:
-                xstart = (length-index-1)*100
+                # needs to be inverted ;)
+                offset = sum(self.offsets[:length-index-1])
+                xstart = (length-index-1)*100 + offset
                 axes.plot((xstart, xstart+20), (162.5, 162.5), self.color,
                           linewidth=5)
                 # now add the label
