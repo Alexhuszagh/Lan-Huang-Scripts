@@ -10,6 +10,7 @@ These scripts should be fully supported on any Python-supported operating system
     - [File Fixing Scripts](#file-fixing-scripts)
     - [Automated Data Analysis](#automated-data-analysis)
     - [Data Conversion](#data-conversion)
+    - [Automated Images](#automated-images)
   - [JavaScript](#javascript)
     - [Protein Prospector](#protein-prospector)
 
@@ -42,6 +43,11 @@ These scripts should be fully supported on any Python-supported operating system
 
 2. [XL To CSV](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/xl_to_csv.py)
     * Converts an output from XL Discoverer, with the ambiguity intact, to take either the first option within each ambiguous position or to include all for spatial restraints. Outputs to a "prot1,res1,prot2,res2" CSV format used as spatial constraints in IMP.
+
+### Automated Images
+
+1. [Sequence Ions](https://github.com/Alexhuszagh/Lan-Huang-Scripts/blob/master/python/seuqnece_ions.py)
+    * Generates an ion sequencing image for y/b-ions, which can export to PNG, PDF, SVG, PS, and EPS. Requires PySide and Matplotlib.
 
 ### JavaScript
 
