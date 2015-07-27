@@ -22,7 +22,16 @@ __author__ = "Alex Huszagh"
 __maintainer__ = "Alex Huszagh"
 __email__ = "ahuszagh@gmail.com"
 
-# This script aims to provide an interface to simplify
+# This script aims to provide an interface to simplify the generation of
+# high quality figures for sequencing ions, by automatically genrating
+# highly customizable images using a TEX format.
+
+# Ex.:
+# python sequence_ions.py --peptide SAM_PL^ER_{SAM}PLER^{SA}MPLER
+# --ions y1 y2 y3 y4 y10 y13 b1 b2 b3 b5 b10 b13 --color red
+# --format png --output output.png
+
+# http://i.imgur.com/04kMGDM.png
 
 # load modules
 import argparse
