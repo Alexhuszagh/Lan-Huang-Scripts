@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
+Copyright (C) 2015 The Regents of the University of California.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -126,6 +126,7 @@ except IOError:
 #    SCAN FINDER
 # ------------------
 
+
 class ScanFinder(object):
     '''Iteratively parses chunks and breaks them into scans, with
     a bound remainder.
@@ -234,6 +235,7 @@ class ScanFinder(object):
 # ------------------
 #    SCAN PARSER
 # ------------------
+
 
 class ParseMgf(object):
     '''Parses MGF file format using series of known subs (specific
@@ -361,6 +363,7 @@ class ParseMgf(object):
 # ------------------
 #       MAIN
 # ------------------
+
 
 def main():
     '''Runs the core tasks'''

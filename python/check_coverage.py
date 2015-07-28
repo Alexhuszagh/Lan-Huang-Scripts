@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
+Copyright (C) 2015 The Regents of the University of California.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -163,6 +163,7 @@ else:
 #       UTILS
 # ------------------
 
+
 def find_all(value, sub):
     """Find all occurrences within a string"""
 
@@ -177,6 +178,7 @@ def find_all(value, sub):
 # ------------------
 #    SEQ FUNCTIONS
 # ------------------
+
 
 def connect_uniprot(protein, host=SERVER['host']):
     '''Connects to the UniProt database and makes the query'''
@@ -197,6 +199,7 @@ def connect_uniprot(protein, host=SERVER['host']):
         value = value.decode('utf-8')
     return value
 
+
 def get_sequences(proteins=ARGS.protein):
     '''Grabs all the UniProt sequences from a list of UniProt identifiers'''
 
@@ -213,6 +216,7 @@ def get_sequences(proteins=ARGS.protein):
 # PEPTIDE FUNCTIONS
 # ------------------
 
+
 def protein_coverage(dataframe, protein, sequence):
     '''Returns the protein coverage for a given UniProt ID bait and
     sequence.
@@ -227,12 +231,12 @@ def protein_coverage(dataframe, protein, sequence):
     # iterate over sequences
     for seq in sequences:
         positions = list(find_all(sequence, seq))
-        #print(positions, len(seq), seq)
         for position in positions:
             for index in range(len(seq)):
                 key = index + position
                 data[key] = True
     return data
+
 
 def get_coverage(dataframes, protein, sequence):
     '''Iterativelt returns the protein coverage for each df within
@@ -245,6 +249,7 @@ def get_coverage(dataframes, protein, sequence):
         coverage = protein_coverage(dataframe, protein, sequence)
         coverage_list.append(coverage)
     return coverage_list
+
 
 def process_condition(header, coverage, sequence, index):
     '''Processes the header to give the conditions coverage of the
@@ -269,12 +274,14 @@ def process_condition(header, coverage, sequence, index):
 #    OUT FUNCTIONS
 # ------------------
 
+
 def start_sequence(sequence):
     '''Starts the lines for a new protein'''
 
     print('-------------------------', file=STDOUT)
     print(sequence[0], file=STDOUT)
     print(file=STDOUT)
+
 
 def write_sequence_line(sequence, index, indent=15):
     '''Writes a sequence line with indentation to file'''
@@ -288,8 +295,10 @@ def write_sequence_line(sequence, index, indent=15):
     line += sequence[index]
     print(line, file=STDOUT)
 
+
 def write_blank_line():
     print(file=STDOUT)
+
 
 def write_condition(header, coverage, sequence, index):
     '''Writes the condition with coverage to file'''
@@ -297,11 +306,13 @@ def write_condition(header, coverage, sequence, index):
     output = process_condition(header, coverage, sequence, index)
     print(output, file=STDOUT)
 
+
 def close_sequence():
     '''Closes the lines for a protein'''
 
     print('-------------------------', file=STDOUT)
     print(file=STDOUT)
+
 
 def get_header(condition, total=12):
     '''Grabs a 35 character header from the given condition'''
@@ -311,6 +322,7 @@ def get_header(condition, total=12):
     header = ''.join([header, ' : '])
     header = ''.join([header, ' '*(total-length)])
     return header
+
 
 # pylint: disable=dangerous-default-value
 def process_output(sequences, conditions=ARGS.conditions,
@@ -340,6 +352,7 @@ def process_output(sequences, conditions=ARGS.conditions,
 # ------------------
 #       MAIN
 # ------------------
+
 
 def main():
     '''On start'''

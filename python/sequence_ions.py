@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
+Copyright (C) 2015 The Regents of the University of California.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -40,10 +40,9 @@ import re
 import sys
 
 import matplotlib
-matplotlib.rcParams['mathtext.default'] = 'regular'
-
-# load functions.objects
 from PySide import QtCore, QtGui
+
+matplotlib.rcParams['mathtext.default'] = 'regular'
 
 # CONSTANTS
 
@@ -56,7 +55,6 @@ QLabel {
 
 AMINO_ACIDS = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N',
                'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
-
 SUBSCRIPT_RATIO = 0.375
 
 # REGEXES
@@ -64,17 +62,14 @@ ION = re.compile('^(b|y|B|Y)([0-9]+)$')
 AA_SET = '[{0}]'.format(''.join(AMINO_ACIDS))
 # need at least one preceeding AA, then any number of <AA>_{<AA>}
 # pairs, where each group can be <AA>, _|^<AA>, {<AA>}, _|^{<AA>}
-#RES = r'^(?:%(aa)s|%(aa)s[_^]%(aa)s|' \
-#      r'\{%(aa)s+\}|%(aa)s[_^]\{%(aa)s+\})' %{'aa': AA_SET}
-#PEPTIDE = re.compile(RES + '+$')
-
 RES = r'^(?:%(aa)s[_^]\{%(aa)s+\}|%(aa)s[_^]%(aa)s|' \
-      r'\{%(aa)s+\}|%(aa)s)' %{'aa': AA_SET}
+      r'\{%(aa)s+\}|%(aa)s)' % {'aa': AA_SET}
 PEPTIDE = re.compile(RES + '+$')
 
 # ------------------
 #     ARGUMENTS
 # ------------------
+
 
 def check_ions(peptide, ions):
     '''Validates the input ion choices'''
@@ -123,6 +118,7 @@ elif ARGS.ions is not None:
 # ------------------
 #      WIDGETS
 # ------------------
+
 
 class IonSelection(QtGui.QWidget):
     '''Ion selection upon peptide selection'''
@@ -177,6 +173,7 @@ class IonSelection(QtGui.QWidget):
                 hlayout.addWidget(btn)
             self.layout.addLayout(hlayout)
 
+
 class PeptideSelection(QtGui.QWidget):
     '''Peptide selection widget interface'''
 
@@ -208,6 +205,7 @@ class PeptideSelection(QtGui.QWidget):
 # ------------------
 #  MAIN APPLICATION
 # ------------------
+
 
 class MainWindow(QtGui.QMainWindow):
     '''Launch Main Window'''
@@ -359,7 +357,7 @@ class MainWindow(QtGui.QMainWindow):
         # and then to capture solely the text within the {} notation.
         # use the "\\1" formating notation to replace {(group)} with
         # (group)
-        pattern = r'(?<![_^])\{(%s+)\}' %(AA_SET)
+        pattern = r'(?<![_^])\{(%s+)\}' % (AA_SET)
         self.peptide = re.sub(pattern, r'\1', self.peptide)
 
     def get_length(self, peptide=None):
@@ -369,7 +367,7 @@ class MainWindow(QtGui.QMainWindow):
         '''
 
         peptide = self.peptide if peptide is None else peptide
-        pattern = r'(?:[_^]\{(%(aa)s+)\}|[_^]%(aa)s)' %{'aa': AA_SET}
+        pattern = r'(?:[_^]\{(%(aa)s+)\}|[_^]%(aa)s)' % {'aa': AA_SET}
         return len(re.sub(pattern, '', peptide))
 
     def get_offset(self, peptide=None):
@@ -379,7 +377,7 @@ class MainWindow(QtGui.QMainWindow):
         '''
 
         peptide = self.peptide if peptide is None else peptide
-        pattern = r'(?:[_^]\{(%(aa)s+)\}|[_^](%(aa)s))' %{'aa': AA_SET}
+        pattern = r'(?:[_^]\{(%(aa)s+)\}|[_^](%(aa)s))' % {'aa': AA_SET}
         matches = re.findall(pattern, peptide)
         matches = ''.join([''.join(i) for i in matches])
         return len(matches)
@@ -419,7 +417,7 @@ class MainWindow(QtGui.QMainWindow):
             match = re.match(RES, peptide)
             res = match.group(0)
             # create formatting string + set offsets
-            residue = r'$%s$' %res
+            residue = r'$%s$' % res
             offset = 100*SUBSCRIPT_RATIO*self.get_offset(res)
             self.offsets.append(offset)
             # x, y, text
@@ -447,7 +445,7 @@ class MainWindow(QtGui.QMainWindow):
                 # b-ions have a line
                 self.ions[1][index-1] or
                 # y-ions have a line
-                self.ions[0][length-index-1]):
+                self.ions[0][length - index - 1]):
                 axes.plot((index*100+offset, index*100+offset),
                           (37.5, 162.5), self.color, linewidth=5)
         # now have 20+30 room for the horizontal lines
@@ -461,7 +459,7 @@ class MainWindow(QtGui.QMainWindow):
                 axes.plot((xstart-20, xstart), (37.5, 37.5), self.color,
                           linewidth=5)
                 # now add the label
-                label = r'$b_{%d}$' %(index+1)
+                label = r'$b_{%d}$' % (index+1)
                 # x, y, text
                 axes.text(xstart-80, 27.5, label, fontsize=20,
                           fontproperties=font)
@@ -477,7 +475,7 @@ class MainWindow(QtGui.QMainWindow):
                           linewidth=5)
                 # now add the label
                 # now add the label
-                label = r'$y_{%d}$' %(index+1)
+                label = r'$y_{%d}$' % (index+1)
                 # x, y, text
                 axes.text(xstart+30, 162.5, label, fontsize=20,
                           fontproperties=font)
@@ -485,6 +483,7 @@ class MainWindow(QtGui.QMainWindow):
 # ------------------
 #       MAIN
 # ------------------
+
 
 def main():
     '''On init'''

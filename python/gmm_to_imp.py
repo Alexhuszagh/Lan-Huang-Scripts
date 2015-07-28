@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
+Copyright (C) 2015 The Regents of the University of California.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ __email__ = "ahuszagh@gmail.com"
 #   4941934 zz   73.9106411376
 
 # NEW:
-#|num|weight|mean|covariance matrix|
+# |num|weight|mean|covariance matrix|
 #   |0|0.0413058594461|109.030172464 156.16938915 199.811744906|47.6365906013 3.18872165553 25.9605183623 3.18872165553 48.9172548113 7.58697082845 25.9605183623 7.58697082845 82.6404336747|
 
 # load modules
@@ -82,6 +82,7 @@ else:
 #      FUNCTIONS
 # ------------------
 
+
 def isnumber(value):
     '''Checks to see if the value is a number'''
 
@@ -94,6 +95,7 @@ def isnumber(value):
 # ------------------
 #      CLASSES
 # ------------------
+
 
 class GmmParser(object):
     '''Parsers the core GMM file'''
@@ -124,10 +126,10 @@ class GmmParser(object):
         if line.startswith("REMARK "):
             line = line[len("REMARK "):]
             self.parse_remark(line)
-        #elif line.startswith("HEADER"):
-        #    pass
-        #elif line.startswith("HETATM"):
-        #    pass
+        # elif line.startswith("HEADER"):
+        #     pass
+        # elif line.startswith("HETATM"):
+        #     pass
 
     def parse_remark(self, line):
         '''
@@ -138,18 +140,18 @@ class GmmParser(object):
         if line.startswith("NGAUSS"):
             # store ngauss info
             self.ngauss = int(line[len("NGAUSS "):])
-        #elif line.startswith("COMMAND"):
-        #    pass
-        #elif line.startswith("START_DATE"):
-        #    pass
-        #elif line.startswith("END_DATE"):
-        #    pass
-        #elif line.startswith("COMP_TIME_SEC"):
-        #    pass
-        #elif line.startswith("FILENAME"):
-        #    pass
-        #elif line.startswith("COMMENT"):
-        #    pass
+        # elif line.startswith("COMMAND"):
+        #     pass
+        # elif line.startswith("START_DATE"):
+        #     pass
+        # elif line.startswith("END_DATE"):
+        #     pass
+        # elif line.startswith("COMP_TIME_SEC"):
+        #     pass
+        # elif line.startswith("FILENAME"):
+        #     pass
+        # elif line.startswith("COMMENT"):
+        #     pass
         elif line.startswith("GAUSS"):
             self.parse_gaussian(line)
 
@@ -166,16 +168,17 @@ class GmmParser(object):
         assert num < self.ngauss if self.ngauss else True
         if var == 'W':
             self.gaussians[num]['weight'] = float(values[0])
-        #elif var == 'det':
-        #    self.gaussians[num]['det'] = values[0]
-        #elif var == 'Cons':
-        #    self.gaussians[num]['Cons'] = values[0]
+        # elif var == 'det':
+        #     self.gaussians[num]['det'] = values[0]
+        # elif var == 'Cons':
+        #     self.gaussians[num]['Cons'] = values[0]
         if var == 'M':
             self.gaussians[num]['mean'] = [float(i) for i in values]
         if var == 'CovM':
             self.gaussians[num].setdefault('CovM', [])
             values = [float(i) for i in values if isnumber(i)]
             self.gaussians[num]['CovM'] += values
+
 
 class MakeOutput(GmmParser):
     '''Makes the output from a given file path'''
@@ -227,6 +230,7 @@ class MakeOutput(GmmParser):
 # ------------------
 #       MAIN
 # ------------------
+
 
 def main():
     '''On init'''

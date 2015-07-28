@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
+Copyright (C) 2015 The Regents of the University of California.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -95,6 +95,7 @@ CTERM_MODS = ['C-term', 'cterm']
 #      CLASSES
 # ------------------
 
+
 class CrosslinkPositionParser(object):
     '''
     Processes the ':', '-' delimited objects, along with the amibiguous
@@ -175,6 +176,7 @@ class CrosslinkPositionParser(object):
             for res2 in residues_2:
                 self.crosslinks.add((prot1, res1, prot2, res2))
 
+
 class MakeOutput(CrosslinkPositionParser):
     '''Makes the output from a given file path'''
 
@@ -198,6 +200,7 @@ class MakeOutput(CrosslinkPositionParser):
 # ------------------
 #       MAIN
 # ------------------
+
 
 def main():
     '''On init'''

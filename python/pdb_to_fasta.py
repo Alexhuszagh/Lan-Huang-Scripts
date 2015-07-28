@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2015 Alex Huszagh <<github.com/Alexhuszagh>>
+Copyright (C) 2015 The Regents of the University of California.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -106,6 +106,7 @@ LINE_LENGTH = ARGS.line_length
 #      CLASSES
 # ------------------
 
+
 class ParsePDB(object):
     '''Core parser for the PDB, which handles IO to form sequences'''
 
@@ -138,6 +139,7 @@ class ParsePDB(object):
 
         name = os.path.splitext(os.path.basename(path))[0]
         return self.parser.get_structure(name, path)
+
 
 class MakeSequence(ParsePDB):
     '''Makes the sequence from a given PDB path or code'''
@@ -185,6 +187,7 @@ class MakeSequence(ParsePDB):
 # ------------------
 #       MAIN
 # ------------------
+
 
 def main():
     '''On init'''
