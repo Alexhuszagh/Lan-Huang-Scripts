@@ -116,7 +116,7 @@ PARSER.add_argument("-c", "--conditions", nargs='+',
 PARSER.add_argument("-f", "--files", nargs='+', required=True,
                     help="Input Tab-Delimited Text Files")
 PARSER.add_argument("-p", "--protein", type=str, nargs='+',
-                    required=True, help="UniProt ID")
+                    help="UniProt ID")
 PARSER.add_argument("-o", "--output", type=str,
                     help="Optional output file, default to STDOUT")
 ARGS = PARSER.parse_args()
@@ -124,11 +124,11 @@ ARGS = PARSER.parse_args()
 # process args
 if not all([len(i) in [6, 10] for i in ARGS.protein]):
     raise argparse.ArgumentTypeError('Please enter a valid UniProt ID')
+if not ARGS.conditions:
+    ARGS.conditions = ARGS.files
 if len(ARGS.files) != len(ARGS.conditions):
     raise argparse.ArgumentTypeError(
         'Must enter an equal number of conditions and files.')
-if not ARGS.conditions:
-    ARGS.conditions = ARGS.files
 # make local files global
 ARGS.files = [os.path.join(PATH, i) for i in ARGS.files]
 if not all([os.path.exists(i) for i in ARGS.files]):
