@@ -167,14 +167,16 @@ PARSER.add_argument('-o', "--output", type=str, help="Outfile path")
 PARSER.add_argument('-f', "--format", type=str, default="png",
                     choices=['png', 'svg', 'pdf', 'ps', 'eps'],
                     help="Output format for the image")
+PARSER.add_argument('-k', "--keep-lines", action="store_true",
+                    help="Keep lines for no sequencing ions")
 PARSER.add_argument('-s', '--same-line', action='store_true',
                     help='Put sequencing ion text at same height as line')
 PARSER.add_argument('-df', '--different-line-font', type=float, default=0.6,
                     help='Different line font size relative to font')
 PARSER.add_argument('-sf', '--same-line-font', type=float, default=0.4,
                     help='Same line font size relative to font')
-PARSER.add_argument('-k', "--keep-lines", action="store_true",
-                    help="Keep lines for no sequencing ions")
+PARSER.add_argument('-l', '--line-width', type=int, choices=range(2, 21),
+                    default=5, help="Line width")
 ARGS = PARSER.parse_args()
 
 if ARGS.peptide is None and ARGS.ions is not None:
@@ -209,7 +211,7 @@ FONT_HEIGHT = (HEIGHT//2) - (FONTSIZE//2)
 FONT_POSITION = (WIDTH//2)-(FONTSIZE//2)
 SUBSCRIPT_RATIO = 0.75
 # line width settings
-LINE_WIDTH = 5
+LINE_WIDTH = ARGS.line_width
 SAMELINE_LENGTH = 20
 DIFFERENT_LINE_RATIO = 0.75
 # need to set the minimum and max to flank the rest
