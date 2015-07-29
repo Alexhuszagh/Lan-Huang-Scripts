@@ -211,7 +211,6 @@ FONT_HEIGHT = (HEIGHT//2) - (FONTSIZE//2)
 FONT_POSITION = (WIDTH//2)-(FONTSIZE//2)
 SUBSCRIPT_RATIO = 0.75
 # line width settings
-LINE_WIDTH = ARGS.line_width
 SAMELINE_LENGTH = 20
 DIFFERENT_LINE_RATIO = 0.75
 # need to set the minimum and max to flank the rest
@@ -604,7 +603,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.ions[0][length - index - 1]):
                 axes.plot((WIDTH*index+offset, WIDTH*index+offset),
                           (VERT_LINE_MIN, VERT_LINE_MAX), self.color,
-                          linewidth=LINE_WIDTH)
+                          linewidth=ARGS.line_width)
         # now have 20+30 room for the horizontal lines
         # bottom ion series
         b_ions = self.ions[1]
@@ -687,7 +686,7 @@ class MainWindow(QtGui.QMainWindow):
             xstart -= length
         axes.plot((xstart, xstart+length),
                   (height, height),
-                  self.color, linewidth=LINE_WIDTH)
+                  self.color, linewidth=ARGS.line_width)
 
     def _length(self, index):
         '''Calculates the ion label line length'''
@@ -755,7 +754,7 @@ class MainWindow(QtGui.QMainWindow):
         '''Returns the label height when not on same line'''
 
         if series == 'b':
-            height = VERT_LINE_MIN - 3*(SUB_FONTSIZE/2) - LINE_WIDTH
+            height = VERT_LINE_MIN - 3*(SUB_FONTSIZE/2) - ARGS.line_width
         else:
             height = VERT_LINE_MAX + SUB_FONTSIZE
         return height
