@@ -40,6 +40,12 @@ __email__ = "ahuszagh@gmail.com"
 # --ions y1 y2 y3 y4 y10 y13 b1 b2 b3 b5 b10 b13
 # --color red --same-line --format png --output output.png
 
+# python sequence_ions.py --peptide
+# "Ac-SAM(Ox)K_{XLA}K_{XLB}M(Ox)"
+# --ions y1 y2 y3 y4 y10 y13 b1 b2 b3 b5 b10 b13
+# --color red --same-line --format png --output output.png
+
+
 # http://i.imgur.com/04kMGDM.png
 
 # Future improvements:
@@ -177,6 +183,10 @@ PARSER.add_argument('-sf', '--same-line-font', type=float, default=0.4,
                     help='Same line font size relative to font')
 PARSER.add_argument('-l', '--line-width', type=int, choices=range(2, 21),
                     default=5, help="Line width")
+PARSER.add_argument('-vl', '--variable-length', action="store_true",
+                    help="Variable length for different ion lines")
+PARSER.add_argument('-fl', '--fixed-length', type=int, choices=range(10, 41),
+                    default=20, help="Fixed length for ion lines")
 PARSER.add_argument('-ds', '--different-line-span', type=float,
                     default=0.75, help="Ion series different line span")
 ARGS = PARSER.parse_args()
@@ -215,8 +225,6 @@ FONT_HEIGHT = (HEIGHT//2) - (FONTSIZE//2)
 # define the font position
 FONT_POSITION = (WIDTH//2)-(FONTSIZE//2)
 SUBSCRIPT_RATIO = 0.75
-# line width settings
-SAMELINE_LENGTH = 20
 # need to set the minimum and max to flank the rest
 VERT_LINE_MIN = HEIGHT/2 - 5*FONTSIZE/4
 VERT_LINE_MAX = HEIGHT/2 + 5*FONTSIZE/4
@@ -270,7 +278,7 @@ class IonSelection(QtGui.QWidget):
             lst -- storage list for ion series
         '''
 
-        length = self.parent().get_length(self.peptide)
+        length = self.parent()._get_length(self.peptide)
         for idx in range(0, length - 1, 5):
             hlayout = QtGui.QHBoxLayout()
             limit = min([idx+5, length - 1])
@@ -695,8 +703,8 @@ class MainWindow(QtGui.QMainWindow):
     def _length(self, index):
         '''Calculates the ion label line length'''
 
-        if ARGS.same_line:
-            return SAMELINE_LENGTH
+        if ARGS.same_line or not ARGS.variable_length:
+            return ARGS.fixed_length
         else:
             return ARGS.different_line_span*(WIDTH + self.offsets[index])
 
@@ -741,7 +749,7 @@ class MainWindow(QtGui.QMainWindow):
     def _same_ion_label_position(self, series, index, label):
         '''Returns the relative x position for the same line series'''
 
-        label_shift = SAMELINE_LENGTH + SUB_FONTSIZE/2
+        label_shift = ARGS.fixed_length + SUB_FONTSIZE/2
         num_length = len(NOT_ALNUM.sub('', label)) - 1
         if series == 'b':
             adjust = -(label_shift + SUB_FONTSIZE +
@@ -766,15 +774,24 @@ class MainWindow(QtGui.QMainWindow):
     def _different_ion_label_position(self, series, index, label):
         '''Returns the relative x position for the different line series'''
 
-        length = self._length(index)/ARGS.different_line_span
+        length = self._length(index)
+        # only shift adjustment if necessary
+        if ARGS.variable_length:
+            length /= ARGS.different_line_span
         label_shift = length/2
         num_length = len(NOT_ALNUM.sub('', label)) - 1
         label_adjust = (SUB_FONTSIZE +
                         SUB_FONTSIZE*SUBSCRIPT_RATIO*(num_length))
         if series == 'b':
-            adjust = -(label_shift+(label_adjust-SUB_FONTSIZE)/2)
+            if ARGS.variable_length:
+                adjust = -(label_shift+(label_adjust-SUB_FONTSIZE)/2)
+            else:
+                adjust = -(label_shift*2+(label_adjust-SUB_FONTSIZE))
         else:
-            adjust = label_shift - label_adjust/2
+            if ARGS.variable_length:
+                adjust = label_shift - label_adjust/2
+            else:
+                adjust = SUB_FONTSIZE/2
         return adjust
 
 # ------------------
