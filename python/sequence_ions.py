@@ -177,6 +177,8 @@ PARSER.add_argument('-sf', '--same-line-font', type=float, default=0.4,
                     help='Same line font size relative to font')
 PARSER.add_argument('-l', '--line-width', type=int, choices=range(2, 21),
                     default=5, help="Line width")
+PARSER.add_argument('-ds', '--different-line-span', type=float,
+                    default=0.75, help="Ion series different line span")
 ARGS = PARSER.parse_args()
 
 if ARGS.peptide is None and ARGS.ions is not None:
@@ -188,6 +190,9 @@ elif not (0.2 <= ARGS.same_line_font <= 0.5):
 elif not (0.2 <= ARGS.different_line_font <= 1):
     raise argparse.ArgumentTypeError("Please enter a valid different line "
                                      "font size from 0.2 to 1.0.")
+elif not (0.2 <= ARGS.different_line_span <= 1):
+    raise argparse.ArgumentTypeError("Please enter a valid different line "
+                                     "span ratio from 0.2 to 1.0.")
 if ARGS.peptide is not None:
     if not PEPTIDE.match(ARGS.peptide):
         raise argparse.ArgumentTypeError("Please enter a valid peptide "
@@ -212,7 +217,6 @@ FONT_POSITION = (WIDTH//2)-(FONTSIZE//2)
 SUBSCRIPT_RATIO = 0.75
 # line width settings
 SAMELINE_LENGTH = 20
-DIFFERENT_LINE_RATIO = 0.75
 # need to set the minimum and max to flank the rest
 VERT_LINE_MIN = HEIGHT/2 - 5*FONTSIZE/4
 VERT_LINE_MAX = HEIGHT/2 + 5*FONTSIZE/4
@@ -694,7 +698,7 @@ class MainWindow(QtGui.QMainWindow):
         if ARGS.same_line:
             return SAMELINE_LENGTH
         else:
-            return DIFFERENT_LINE_RATIO*(WIDTH + self.offsets[index])
+            return ARGS.different_line_span*(WIDTH + self.offsets[index])
 
     def _ion_line_height(self, series):
         '''Calculates the ion line y position'''
@@ -762,7 +766,7 @@ class MainWindow(QtGui.QMainWindow):
     def _different_ion_label_position(self, series, index, label):
         '''Returns the relative x position for the different line series'''
 
-        length = self._length(index)/DIFFERENT_LINE_RATIO
+        length = self._length(index)/ARGS.different_line_span
         label_shift = length/2
         num_length = len(NOT_ALNUM.sub('', label)) - 1
         label_adjust = (SUB_FONTSIZE +
