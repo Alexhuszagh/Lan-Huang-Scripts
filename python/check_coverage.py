@@ -175,6 +175,33 @@ def find_all(value, sub):
         yield start
         start += len(sub)
 
+def uniquer(seq, idfun=None):
+    '''
+    Converts a sequence to a unique list while keeping order.
+    Recipe modified from:
+    https://code.activestate.com/recipes/52560-remove-duplicates-from-a-sequence/
+    :
+        >>> uniquer(range(4) + range(-2, 4))
+        [0, 1, 2, 3, -2, -1]
+    '''
+
+    if idfun is None:
+        # pylint: disable=E0102
+        def idfun(var):
+            return var
+    seen = {}
+    result = []
+    for item in seq:
+        marker = idfun(item)
+        # in old Python versions:
+        # if seen.has_key(marker)
+        # but in new ones:
+        if marker in seen:
+            continue
+        seen[marker] = 1
+        result.append(item)
+    return result
+
 # ------------------
 #    SEQ FUNCTIONS
 # ------------------
@@ -206,6 +233,7 @@ def get_sequences(proteins=ARGS.protein):
     # init return
     sequences = []
     # grab sequences
+    proteins = uniquer(proteins)
     for protein in proteins:
         sequence = connect_uniprot(protein)
         # remove header
