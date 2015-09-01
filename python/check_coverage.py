@@ -321,7 +321,6 @@ class Writer(object):
         elif self.mode == 'docx':
             self.paragraph.add_run(line + '\n')
 
-
     def write_blank_line(self):
         '''Write blank line to file'''
 
@@ -329,7 +328,6 @@ class Writer(object):
             print(file=self.file)
         elif self.mode == 'docx':
             self.paragraph.add_run('\n')
-
 
     def write_condition(self, header, coverage, cuts, sequence, index):
         '''Writes the condition with coverage to file'''
@@ -340,7 +338,6 @@ class Writer(object):
             print(output, file=self.file)
         elif self.mode == 'docx':
             self.paragraph.add_run('\n')
-
 
     def close_sequence(self):
         '''Closes the lines for a protein'''
@@ -411,19 +408,19 @@ class Writer(object):
         # create normal style
         style = self.file.styles['Normal']
         font = style.font
-        font.name = 'Monospace'
+        font.name = 'Courier New'
         font.size = Pt(8)
         # create red style
         style = self.file.styles.add_style('Red', WD_STYLE_TYPE.CHARACTER)
         font = style.font
         font.color.rgb = RGBColor(0xFF, 0x0, 0x0)
-        font.name = 'Monospace'
+        font.name = 'Courier New'
         font.size = Pt(8)
         # create black style
         style = self.file.styles.add_style('Black', WD_STYLE_TYPE.CHARACTER)
         font = style.font
         font.color.rgb = RGBColor(0x0, 0x0, 0x0)
-        font.name = 'Monospace'
+        font.name = 'Courier New'
         font.size = Pt(8)
 
     def _get_path(self, out):
