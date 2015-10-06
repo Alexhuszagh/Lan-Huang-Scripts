@@ -35,6 +35,10 @@ __email__ = "ahuszagh@gmail.com"
 # SCANS=228
 # 129.035 4.3
 
+# Ex.:
+# INPUT:
+#   $ python rv_mgf_converter.py -m G6E.MGF
+
 # The "File:" and "scans: " subs are mutually incompatible insofar."
 
 # load modules
