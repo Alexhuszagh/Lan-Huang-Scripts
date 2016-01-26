@@ -27,17 +27,22 @@ __email__ = "ahuszagh@gmail.com"
 # due to their mixing and matching of the MS_CONVERT and
 # PROTEOME_DISCOVERER file formats.
 
-# TITLE=File: "I:\UCIrvine\G6E_lanmod195mintop4forms3.raw"; SpectrumID: "1";
-# scans: "228"
-# PEPMASS=489.27979 68179.95313
-# CHARGE=4+
-# RTINSECONDS=98
-# SCANS=228
-# 129.035 4.3
+# MASS=Monoisotopic
+# BEGIN IONS
+# TITLE=File16 Spectrum1003 scans:1927
+# PEPMASS=496.23788 594326.18750
+# CHARGE=3+
+# RTINSECONDS=830
+# SCANS=1927
+# 137.059 1949.63
+# 154.348 89.4629
+# 155.189 1250.86
+# 185.103 6346.79
+# 186.203 872.14
 
 # Ex.:
 # INPUT:
-#   $ python rv_mgf_converter.py -m G6E.MGF
+#   $ python pdf_mgf_converter.py -m G6E.MGF
 
 # The "File:" and "scans: " subs are mutually incompatible insofar."
 
@@ -210,15 +215,13 @@ class ParseMgf(object):
     _sub_repl = ('scans: ', 'scan=')
 
     _parser = re.compile(
+        r'(?:MASS=Monoisotopic\r?\n)?'
         r'BEGIN IONS\r?\n'
-        # ; scans: "228"
-        r'TITLE=File: \"(.*)\"; SpectrumID: \"\d*\"; scans: \"(\d*)\"\r?\n'
-        # newline
-        r'PEPMASS=([0-9]+\.[0-9]+)'
-        r'(?: ([0-9]*\.[0-9]+))?\r?\n'
-        r'(CHARGE=([0-9]+)\+\r?\n)?'
-        r'RTINSECONDS=([0-9]*\.?[0-9]*)\r?\n'
-        r'SCANS=\d*\r?\n')
+        r'TITLE=(.*) Spectrum([0-9]+) scans: ([0-9]+)\r?\n'
+        r'PEPMASS=([0-9]+\.[0-9]+) ([0-9]*\.?[0-9]*)\r?\n'
+        r'(?:CHARGE=([0-9]+)\+\r?\n)?'
+        r'RTINSECONDS=([0-9]+)\r?\n'
+        r'SCANS=([0-9]+)\r?\n')
 
     _out_format = (
         'BEGIN IONS\n'
@@ -263,7 +266,8 @@ class ParseMgf(object):
 
         # sub, repl = self._sub_repl
         match = self._parser.split(scan)
-        args = map(match.__getitem__, [2, 7, 1, 3, 4, 6, 8])
+        # num, rt, title, precursor mz, precursor intensity, charge, spectra
+        args = map(match.__getitem__, [3, 7, 1, 4, 5, 6, 9])
         args[1] = str(round(int(args[1]) / 60, 3))
         scan =  self._out_format.format(*args)
         self.write_new_scan(scan)
