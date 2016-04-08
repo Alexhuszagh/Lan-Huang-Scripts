@@ -167,8 +167,13 @@ PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-p', "--peptide", type=str, help="Peptide sequenced")
 PARSER.add_argument('-i', "--ions", type=str, nargs="+",
                     help="Sequencing ions")
-PARSER.add_argument('-c', "--color", type=str, default="blue",
+PARSER.add_argument('-c', "--color", type=str, default="#2C3539",
+                    # default is gunmetal.
                     help="Color for the sequencing bars")
+PARSER.add_argument('-y', "--yion-color", type=str, default="red",
+                    help="Color for the Y-ion labels")
+PARSER.add_argument('-b', "--bion-color", type=str, default="blue",
+                    help="Color for the B-ion labels")
 PARSER.add_argument('-o', "--output", type=str, help="Outfile path")
 PARSER.add_argument('-f', "--format", type=str, default="png",
                     choices=['png', 'svg', 'pdf', 'ps', 'eps'],
@@ -649,6 +654,7 @@ class MainWindow(QtGui.QMainWindow):
         adjust = self._ion_label_position('b', index, label)
         # x, y, text
         axes.text(xstart+adjust, self._ion_label_height('b'), label,
+                  color=ARGS.bion_color,
                   fontsize=SUB_FONTSIZE,
                   fontproperties=font)
 
@@ -669,6 +675,7 @@ class MainWindow(QtGui.QMainWindow):
         adjust = self._ion_label_position('y', offset_index, label)
         # no need to adjust height
         axes.text(xstart+adjust, self._ion_label_height('y'), label,
+                  color=ARGS.yion_color,
                   fontsize=SUB_FONTSIZE,
                   fontproperties=font)
 
